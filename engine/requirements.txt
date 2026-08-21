@@ -1,0 +1,14 @@
+streamlit
+streamlit-searchbox
+swisseph
+pandas
+pytz
+python-dateutil
+numpy
+sentence-transformers
+pypdf
+pyswisseph
+streamlit
+pyswisseph
+pandas
+numpy

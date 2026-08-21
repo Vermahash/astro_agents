@@ -1,0 +1,576 @@
+You are right. The issue is **not the table headings**. Your table structure can stay.
+
+The missing layer is a **Query Router + Table Access Protocol** that tells the LLM:
+
+1. what the user is actually asking,
+2. which life-event group or groups it belongs to,
+3. which houses are required,
+4. which principal cusp or cusps to inspect,
+5. which tables to pull from your existing packet,
+6. when to run one-track vs multi-track judgment,
+7. when to ask clarification,
+8. when to use KP core logic even if no exact event label exists.
+
+This is important because KP itself says that for answering a query, a **group of houses** is considered, one house becomes the **principal house**, and the sub-lord of that principal house becomes the deciding factor. The text also says no house or planet is universally good or bad; it depends on the matter being judged. So your engine must first understand the **matter judged**, not blindly force the query into one static rule ID.  
+
+## The correction to your idea of Rule IDs
+
+Do **not** make Rule ID a hard gate at the routing stage.
+
+Make Rule IDs a **trace label**, not the first decision-maker.
+
+Better structure:
+
+```text id="vnhx8u"
+User question → Query Router → Candidate House Groups → Principal Cusp Selection → Existing Packet Tables → KP Core Rules → Event Rule ID if available → Verdict
+```
+
+So if the user asks something unclear like:
+
+```text id="6tw2iy"
+Will things improve?
+```
+
+The engine should not fail immediately because no exact Rule ID exists. It should classify it as **vague/general**, then inspect whether the user’s context points to career, marriage, finance, health, property, litigation, travel, or multiple groups.
+
+If it cannot identify the object, then it asks a clarification.
+
+But if the user says:
+
+```text id="cbfx57"
+Will I get a job abroad?
+```
+
+That belongs to **two groups**, not one:
+
+* job/employment: 2, 6, 10
+* foreign travel/foreign residence: 3, 9, 12
+
+The engine must run a **combined judgment**. It should not choose only career or only travel.
+
+---
+
+# Add this instruction layer to your prompt
+
+You can keep your existing packet headings. Add this section above the Universal Check Loop.
+
+```text id="ur170i"
+## QUERY ROUTER + TABLE ACCESS PROTOCOL
+
+Before using any chart table, first classify what the user is asking.
+
+The model must not immediately jump to houses, planets, DBA, transit, or remedies.
+
+It must first perform QUERY ROUTING.
+
+The query router decides:
+1. What is the event/object being asked?
+2. Is the user asking for promise, timing, quality, cause, choice, remedy, or general direction?
+3. Is the query about the native, another person, spouse, child, parent, partner, employer, buyer, seller, or missing person?
+4. Is the query single-domain or multi-domain?
+5. Which house group or house groups are required?
+6. Which principal cusp or cusps must be judged?
+7. Which existing packet tables must be pulled?
+
+Rule IDs are not allowed to block routing.
+Rule IDs are used only after routing, as evidence labels for the applied logic.
+
+If no exact event Rule ID exists, use the CORE KP HOUSE-INFERENCE ROUTER and mark:
+EVENT_RULE_ID = INFERRED_FROM_HOUSE_MEANING.
+
+Do not deny the result merely because no exact event label exists.
+Deny only if mandatory chart data needed for the selected house group is missing.
+```
+
+This solves your concern: the LLM is directed by **what it is looking for**, not trapped by fixed groups.
+
+---
+
+# Add this: Query intent classification
+
+```text id="d9qudo"
+## QUERY INTENT TYPES
+
+Classify every question into one or more of these intent types:
+
+A. PROMISE QUESTION
+The user asks whether an event will happen.
+Examples:
+- Will I get married?
+- Will I get the job?
+- Will I buy this property?
+
+Required action:
+Judge principal cusp sub-lord first.
+
+B. TIMING QUESTION
+The user asks when an event will happen.
+Examples:
+- When will I marry?
+- When will I get promoted?
+- When will the money come?
+
+Required action:
+First check promise. If promise fails, timing is denied.
+If promise passes, use DBA, ruling planets, and transit.
+
+C. QUALITY QUESTION
+The user asks how the result will be.
+Examples:
+- How will my married life be?
+- Will the job be stable?
+- Will the property be good?
+
+Required action:
+First check event promise, then assess positive/negative house mixture, planetary relationships, aspects, and relevant auxiliary tables.
+
+D. CAUSE / BLOCKAGE QUESTION
+The user asks why something is delayed or blocked.
+Examples:
+- Why am I not getting married?
+- Why is my job stuck?
+- Why is money not coming?
+
+Required action:
+Check negative houses, retrograde gate, Saturn, Punarphoo, DBA non-support, RP mismatch, transit absence, and 11th house speed.
+
+E. CHOICE / COMPARISON QUESTION
+The user asks to choose between options.
+Examples:
+- Job A or Job B?
+- Person A or Person B?
+- Should I buy this house or another?
+
+Required action:
+Create separate tracks for each option. Use ruling planets and relevant house groups for each option. Do not merge the options.
+
+F. MULTI-DOMAIN QUESTION
+The user asks about an event containing more than one life area.
+Examples:
+- Will I get a job abroad?
+- Will marriage happen with someone from another country?
+- Will property sale give profit?
+- Will business partnership succeed?
+
+Required action:
+Run all required house groups. Final verdict must satisfy the combined event, not just one part.
+
+G. GENERAL / VAGUE QUESTION
+The user gives no clear object.
+Examples:
+- What will happen?
+- Will things improve?
+- What is coming next?
+- Is this period good?
+
+Required action:
+Do not force one event group.
+Use DBA + ruling planets + strongest active house significations to identify dominant life areas.
+If still unclear, ask one clarification:
+“Which area do you want judged: career, marriage, finance, property, health, travel, or legal matters?”
+```
+
+This makes the LLM adaptive without becoming random.
+
+---
+
+# Add this: Candidate group scoring
+
+You said the user’s question may belong to many groups. Good. Then do not force one. Use a scoring router.
+
+```text id="g1f9os"
+## CANDIDATE GROUP SCORING
+
+For every user query, generate candidate event groups and score them.
+
+Scoring:
++5 if the user explicitly names the event.
++4 if the main noun maps directly to a house group.
++3 if the verb maps directly to an event action.
++2 if the timeframe implies a timing question.
++2 if the object implies another person or derived houses.
++2 if the query includes money, job, marriage, property, health, travel, child, litigation, or communication keywords.
++1 if the DBA/RP active houses support the group.
+-3 if the group requires assumptions not stated by the user.
+-5 if the group contradicts the user’s explicit wording.
+
+Routing decision:
+- If one group scores 70% or higher and is 15 points above others: use SINGLE-TRACK.
+- If two or more groups are within 15 points: use MULTI-TRACK.
+- If no group reaches 40%: ask clarification.
+- If the query is broad but the user asks for general reading: use DBA/RP active-house scan.
+```
+
+This removes vague words like “most relevant” and gives the LLM deterministic routing.
+
+---
+
+# Add this: Multi-track rule
+
+This is the most important part for your bigger goal.
+
+```text id="j8ab2f"
+## MULTI-TRACK JUDGMENT RULE
+
+If the query belongs to more than one event group, do not collapse it into one house group.
+
+Create separate tracks:
+
+TRACK 1: Primary event
+TRACK 2: Secondary condition
+TRACK 3: Support or consequence, if present
+
+Examples:
+
+1. “Will I get a job abroad?”
+TRACK 1: Employment = 2, 6, 10 / principal 10th cusp
+TRACK 2: Foreign travel/residence = 3, 9, 12 / principal 12th cusp
+Final verdict:
+- Job abroad is promised only if both employment and foreign tracks pass.
+- If job passes but foreign fails: job possible, abroad not supported.
+- If foreign passes but job fails: travel/foreign link possible, job not supported.
+
+2. “Will my property sale give profit?”
+TRACK 1: Disposal of property = 3, 5, 10 / principal 10th cusp
+TRACK 2: Gain/profit = 2, 11 / principal 11th or 2nd support
+Final verdict:
+- Sale may happen only if disposal track passes.
+- Profit requires gain track support.
+- If sale passes but gain fails: sale possible, profit weak/loss possible.
+
+3. “Will marriage happen with foreign person?”
+TRACK 1: Marriage = 2, 7, 11 / principal 7th or 11th as per rule
+TRACK 2: Foreign connection = 3, 9, 12
+Final verdict:
+- Marriage and foreign spouse must be judged separately, then synthesized.
+
+4. “Will court case settlement bring money?”
+TRACK 1: Litigation/contest = 6
+TRACK 2: Settlement/agreement = 7 or 11 depending packet rule
+TRACK 3: Money/gain = 2, 11
+Final verdict:
+- Do not answer only from money houses.
+```
+
+This is how you prevent wrong narrow judgments.
+
+---
+
+# Add this: Existing table access map
+
+This keeps your table headings unchanged but tells the LLM where to look.
+
+```text id="q7b0o1"
+## TABLE ACCESS MAP
+
+Use the existing KP MASTER DATA PACKET tables as follows:
+
+1. QUERY ROUTING
+Use:
+- User question
+- KP PREDICTION METHODOLOGY
+- KP_RULE_DATABASE if present
+- EVENT HOUSE GROUPS if present
+
+2. PRINCIPAL CUSP SELECTION
+Use:
+- KP PLACIDUS CUSPS
+- KP CIL SUB TABLE if advanced interlinking is enabled
+- KP CIL SUB-SUB TABLE only if sub-sub theory is activated
+
+3. PLANETARY STATUS
+Use:
+- KP PLANETARY SIGN / STAR / SUB-LORDS
+- KP RASI CHART (WITH FLAGS)
+- KP NAKSHATRA NADI TABLE as cross-check only
+
+4. HOUSE SIGNIFICATION
+Use:
+- KP PLANET SIGNIFICATION TABLE
+- KP HOUSE SIGNIFICATORS (A/B/C/D)
+- KP 4-STEP THEORY TABLE only if advanced 4-step analysis is enabled
+
+5. NODAL JUDGMENT
+Use:
+- KP NODAL DECODE TABLE
+- KP PLANETARY SIGN / STAR / SUB-LORDS
+- KP HOUSE SIGNIFICATORS
+
+6. RULING PLANET CONFIRMATION
+Use:
+- KP RULING PLANETS (Birth Moment)
+- KP CURRENT RULING PLANETS (Judgment Moment)
+- KP HOUSE SIGNIFICATORS
+- CURRENT TIMING
+
+Judgment moment RPs are primary for query/event selection.
+Birth RPs are secondary unless rectification or natal validation is being judged.
+
+7. TIMING
+Use:
+- CURRENT TIMING (Vimshottari Dasha — DBA)
+- KP PLANET SIGNIFICATION TABLE
+- KP HOUSE SIGNIFICATORS
+- KP RULING PLANETS
+- TRANSIT SNAPSHOT
+
+8. TRANSIT TRIGGER
+Use:
+- TRANSIT SNAPSHOT
+- KP HIT THEORY
+- CURRENT TIMING
+- RULING PLANETS
+
+Transit is never promise. Transit is only trigger.
+
+9. DELAY / OBSTRUCTION
+Use:
+- Retrograde column in KP PLANETARY SIGN / STAR / SUB-LORDS
+- KP RASI CHART flags
+- KP BADHAKA / MARAKA TABLE if relevant
+- 11th house lord/occupant from cusps and significators
+- Saturn/Punarphoo if present
+
+10. AUXILIARY MODIFIERS
+Use only after core KP verdict:
+- KP CUSP ASPECT TABLE
+- KP FORTUNA TABLE
+- NAVAMSA CHECK
+- Exaltation, debilitation, combustion, vargottama
+
+These cannot create promise, denial, or timing unless a KP rule explicitly activates them.
+
+11. KA REMEDIES
+Use only after final KP verdict:
+- KA_REMEDY_DATABASE
+- Active planet/house/rashi/relation from KP verdict
+- Never use KA to override KP.
+```
+
+This respects your packet exactly.
+
+---
+
+# Add this: House group inference when exact category is unclear
+
+This is the part that lets the LLM “get what it is looking for.”
+
+```text id="q1e6av"
+## CORE HOUSE MEANING ROUTER
+
+If the exact event category is absent, infer candidate groups from house meanings.
+
+Use this as a routing aid only. Final judgment must still use KP cusp/sub/significator logic.
+
+1st house:
+self, body, identity, health baseline, personal initiative.
+
+2nd house:
+money received, family, speech, stored wealth, addition to family.
+
+3rd house:
+communication, documents, short travel, courage, effort, messages, change, younger siblings.
+
+4th house:
+home, property, vehicle, mother, education foundation, residence, mental peace, discharge from hospital.
+
+5th house:
+children, pregnancy, love, speculation, creativity, education intelligence.
+
+6th house:
+job service, debt, loan, disease, litigation, competition, employees, obstacles to marriage.
+
+7th house:
+marriage, spouse, partner, public dealings, contracts, opponent, buyer/seller interaction.
+
+8th house:
+delay, danger, surgery, inheritance, sudden events, hidden matters, death/longevity context.
+
+9th house:
+long travel, foreign link, higher knowledge, fortune, father/guru, law/higher principle.
+
+10th house:
+career, status, authority, profession, action, recognition, job role.
+
+11th house:
+fulfillment, gains, realization of desire, network, elder sibling, success of effort.
+
+12th house:
+loss, expense, foreign residence, hospital, isolation, bed comforts, withdrawal.
+
+Do not treat these as universally good or bad.
+Judge them according to the user’s actual matter.
+```
+
+This matches the KP principle that the same house can be favorable in one question and unfavorable in another. 
+
+---
+
+# Add this: Clarification protocol
+
+You do not want the model to ask too many questions. But sometimes it must.
+
+```text id="cxjs8w"
+## CLARIFICATION PROTOCOL
+
+Ask clarification only when the event object cannot be identified.
+
+Do not ask clarification if:
+- the event is clear,
+- the group can be inferred,
+- multiple groups can be judged as tracks,
+- the user asks a broad general reading.
+
+Ask one short clarification if:
+- the user says “will it happen?” without saying what “it” is,
+- the user says “is this good?” without naming the area,
+- the query could produce opposite house logic and no context is available.
+
+Clarification format:
+“Which area should I judge: career, marriage, finance, property, health, travel, legal matter, child, or relationship?”
+
+If user refuses clarification, run GENERAL DBA/RP ACTIVE-HOUSE SCAN and clearly say:
+“No exact event was specified, so this is not an event-specific KP verdict.”
+```
+
+---
+
+# What this does to Rule IDs
+
+Use three levels of rules:
+
+```text id="ofdsy6"
+## RULE ID SYSTEM
+
+A. CORE KP RULES
+Always active.
+Examples:
+- CORE-CSL-001: Principal cusp sub-lord decides promise.
+- CORE-SIG-001: Use relevant house significators.
+- CORE-RETRO-001: Principal CSL retro/star-retro blocks promise.
+- CORE-RP-001: Ruling planets select fruitful significators.
+- CORE-DBA-001: Event occurs in period of relevant significators.
+- CORE-TRANSIT-001: Transit triggers only after promise.
+
+B. EVENT HOUSE RULES
+Used when exact event category is identified.
+Examples:
+- EVENT-JOB-001: Employment = 2, 6, 10 / 10th cusp.
+- EVENT-MARRIAGE-001: Marriage = 2, 7, 11 / 7th or 11th cusp as packet rule states.
+- EVENT-FOREIGN-001: Foreign travel = 3, 9, 12 / 12th cusp.
+
+C. INFERRED ROUTING RULES
+Used when the event is not in the exact dictionary but the house meaning is clear.
+Example:
+- INFERRED-FINANCE-001
+- INFERRED-COMMUNICATION-001
+- INFERRED-STATUS-001
+
+No exact EVENT rule ID is not a failure.
+Failure occurs only if:
+- no event object can be identified,
+- no relevant house group can be inferred,
+- mandatory packet tables for the selected group are missing.
+```
+
+This is the most balanced solution: deterministic but not brittle.
+
+---
+
+# Replace the brittle part in your current prompt
+
+Your current prompt says that if the query fits multiple categories, choose the principal cusp most directly tied to the explicit intent. That is too narrow. 
+
+Replace it with this:
+
+```text id="phctuj"
+If a query fits multiple categories, do not automatically choose only one.
+
+First decide whether the query is:
+1. single-track,
+2. multi-track,
+3. general/vague.
+
+For multi-track questions, judge each relevant group separately and then synthesize.
+
+Choose one principal cusp only when the user’s question is truly single-domain.
+
+If the user asks a compound event, use all principal cusps required by the compound event.
+```
+
+Also replace:
+
+```text id="bx0b63"
+Only DBA lords that are also Ruling Planets can deliver the event.
+```
+
+With:
+
+```text id="kuwtlv"
+DBA lords must be relevant house significators and must receive ruling-planet confirmation directly or through supported star/sub/node/conjunction agency. Take common planets between significators and ruling planets; these indicate the conjoint period if transit agrees.
+```
+
+This wording is closer to the KP text, which says to take common planets between significators and ruling planets, and that they indicate the conjoint period of occurrence if transit agrees. 
+
+---
+
+# Final architecture I recommend
+
+Keep your packet headings. Add **groups** outside the packet:
+
+```text id="jw3taj"
+1. QUERY ROUTER
+2. EVENT GROUP LIBRARY
+3. HOUSE MEANING ROUTER
+4. TABLE ACCESS MAP
+5. MULTI-TRACK JUDGMENT RULE
+6. CORE KP RULES
+7. EVENT RULES
+8. INFERRED RULES
+9. CLARIFICATION PROTOCOL
+10. KA POST-VERDICT ROUTER
+```
+
+The LLM then does this:
+
+```text id="c5k3al"
+User asks question
+↓
+Identify event object and intent
+↓
+Generate candidate groups
+↓
+Single-track or multi-track
+↓
+Select principal cusp(s)
+↓
+Pull only necessary packet tables
+↓
+Apply CSL promise gate
+↓
+Apply significator + retrograde + node logic
+↓
+Apply DBA + RP + transit
+↓
+Synthesize
+↓
+Only then KA
+```
+
+That will get you much closer to your target scores:
+
+| Area                  | With this router layer |
+| --------------------- | ---------------------: |
+| KP purity             |                   9/10 |
+| Determinism           |               8.5–9/10 |
+| Depth                 |                 9.5/10 |
+| Remedy control        |                 8.5/10 |
+| Best-result readiness |                   9/10 |
+
+The key principle:
+
+```text id="tpwhls"
+Do not make the event dictionary a cage.
+Make it a routing map.
+The LLM must first understand the matter judged, then activate the correct house groups, then use the existing packet tables in a fixed KP order.
+```

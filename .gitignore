@@ -1,0 +1,17 @@
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.env
+.env.*
+data/cache/
+data/rag/
+data/sqlite/
+*.db
+.DS_Store
+Thumbs.db
+# Large vendor binaries (keep locally; re-sync from B:\ as needed)
+engine/global_cities_full.csv
+engine/docs/books/*.pdf
+engine/docs/books/*.docx
+engine/.extracted/
