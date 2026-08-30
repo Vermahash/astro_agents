@@ -470,7 +470,15 @@ if st.button("Generate KP MASTER DATA PACKET"):
         structured_payload,
         bnn_display_str,
         unified_kundali,
-    ) = calculate_vedic_charts(name, dt_aware, lat, lon, gender)  # type: ignore[arg-type]
+    ) = calculate_vedic_charts(
+        name,
+        dt_aware,
+        lat,
+        lon,
+        gender,
+        birth_place=selected_city or None,
+        timezone_name=sel_tz,
+    )  # type: ignore[arg-type]
 
     transit_timestamp = transit_timestamp_utc.astimezone(local_tz).strftime("%Y-%m-%d %H:%M:%S %Z")
     dob_str = dob.strftime("%d/%m/%Y") if dob else "N/A"

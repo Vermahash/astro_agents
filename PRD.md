@@ -3,7 +3,8 @@
 **Status:** Build-ready draft  
 **Date:** 2026-08-21  
 **Work directory:** `E:\astro_agents`  
-**Frozen Streamlit (do not break):** `B:\n8n\astro\kp-calculator` (GitHub `Vermahash/kpastro` @ `v2`)
+**Frozen Streamlit (do not break):** `B:\n8n\astro\kp-calculator` (GitHub `Vermahash/kpastro` @ `v2`)  
+**Implementation tracker (done + todo):** [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)
 
 ---
 
@@ -26,11 +27,11 @@ This project keeps that Streamlit experience **exactly as it is**, and builds a 
 | Rule | Detail |
 |------|--------|
 | Live app location | `B:\n8n\astro\kp-calculator` |
-| Deploy | Existing Streamlit / GitHub `v2` flow ù **unchanged** |
+| Deploy | Existing Streamlit / GitHub `v2` flow ? **unchanged** |
 | Entry file | `astro_kp_v2.py` |
 | Math | `astro_kp.py` in that repo remains the upstream source of truth |
 | This repo | `E:\astro_agents\engine\` is a **copy** for development (`VENDOR_COPY.md`) |
-| Forbidden | Pointing Streamlit Cloud at `E:\astro_agents`; ùfixingù Streamlit by rewriting it here |
+| Forbidden | Pointing Streamlit Cloud at `E:\astro_agents`; ?fixing? Streamlit by rewriting it here |
 
 **Sync policy:** When chart math is improved on `B:\`, robocopy into `E:\astro_agents\engine\` (see root README). Prefer fixing math upstream on `B:\` first so the webpage and the new apps stay aligned.
 
@@ -40,7 +41,7 @@ This project keeps that Streamlit experience **exactly as it is**, and builds a 
 
 | Surface | Audience | Role in v1 |
 |---------|----------|------------|
-| **Streamlit KP Calculator** | Existing validated UI | **Frozen** ù packet generation / manual Gemini copy workflow |
+| **Streamlit KP Calculator** | Existing validated UI | **Frozen** ? packet generation / manual Gemini copy workflow |
 | **New interactive web app** (`web/`) | Primary desktop/laptop UX | Charts, Q&A, RAG, verify, profiles, usage |
 | **Telegram bot** (`telegram/`) | You (whitelist) | Same backend API; phone-first commands + chat |
 
@@ -74,7 +75,7 @@ E:\astro_agents
 - Telegram personal access with allowlist.
 - 100% chart numbers from `engine.astro_kp.calculate_vedic_charts` (KP / Krishnamurti).
 - Book RAG (HNSW) + critic pass.
-- Aggressive cost control (see ù9).
+- Aggressive cost control (see ?9).
 
 ### Non-goals (v1)
 
@@ -125,7 +126,7 @@ Interactive product UI (not Streamlit):
 - Birth form (city search / lat-lon / timezone).
 - Chart dashboard: cusps, planets, dasha, drishti highlights from JSON.
 - Chat / ask panel grounded on active chart.
-- Optional ùsourcesù from RAG.
+- Optional ?sources? from RAG.
 - Usage / budget indicator.
 - Profiles (stretch if timeboxed).
 
@@ -156,7 +157,7 @@ UX note: one clear composition per view; chart facts are first-class, not buried
 |---------|--------|
 | Math | `engine/astro_kp.py` |
 | API | FastAPI |
-| Web | Modern React/Vite or Next ù decide at M2 start (interactive SPA) |
+| Web | Modern React/Vite or Next ? decide at M2 start (interactive SPA) |
 | Bot | `python-telegram-bot` or aiogram |
 | DB | SQLite |
 | Vectors | Chroma or FAISS/Qdrant (HNSW) |
@@ -167,16 +168,16 @@ UX note: one clear composition per view; chart facts are first-class, not buried
 
 ## 9. Cost control & caching (mandatory)
 
-1. **Never pay LLM for math** ù Python only.  
-2. **Chart cache** ù hash(birth + engine_version).  
-3. **Session active chart** ù follow-ups send small JSON slices.  
-4. **Deterministic fact answers** ù no LLM when the answer is a field lookup.  
-5. **Stable system prompt prefix** ù provider prompt caching.  
-6. **Local embeddings** ù $0 RAG retrieve after index build.  
-7. **Model ladder** ù no LLM ? Flash ? Glimmer ? `/deep` only.  
-8. **Token caps** ù short completions; low reasoning by default.  
-9. **Answer cache** ù repeat Q on same chart.  
-10. **Budget kill-switch** ù default **$5/mo**; facts still work when LLM disabled.
+1. **Never pay LLM for math** ? Python only.  
+2. **Chart cache** ? hash(birth + engine_version).  
+3. **Session active chart** ? follow-ups send small JSON slices.  
+4. **Deterministic fact answers** ? no LLM when the answer is a field lookup.  
+5. **Stable system prompt prefix** ? provider prompt caching.  
+6. **Local embeddings** ? $0 RAG retrieve after index build.  
+7. **Model ladder** ? no LLM ? Flash ? Glimmer ? `/deep` only.  
+8. **Token caps** ? short completions; low reasoning by default.  
+9. **Answer cache** ? repeat Q on same chart.  
+10. **Budget kill-switch** ? default **$5/mo**; facts still work when LLM disabled.
 
 Anti-patterns: multi-agent fan-out every question; pasting full payload + full books every turn; flagship models as default.
 
@@ -189,6 +190,7 @@ Anti-patterns: multi-agent fan-out every question; pasting full payload + full b
 | **M0** | This PRD + `E:\astro_agents` scaffold + engine copy (done when accepted) |
 | **M1** | `api/` chart compute + cache + golden parity vs Streamlit samples |
 | **M2** | `web/` interactive MVP (chart + ask) |
+| **M2.5** | Tool agent + SQLite field store + MCP chart tools (selective slices; planner fallback) |
 | **M3** | `telegram/` personal bot on same API |
 | **M4** | RAG HNSW + critic + usage governor |
 | **M5** | Deploy story for api/web (Streamlit remains on B:\) |
@@ -197,13 +199,17 @@ Each new module ships with docstrings, README usage, API.md updates, validation,
 
 ---
 
-## 11. Open decisions
+## 11. Locked decisions
 
-1. Web stack: **React/Vite** vs **Next.js**?  
-2. Default LLM: **Gemini Flash** vs **NVIDIA Muse Glimmer**?  
-3. Monthly budget USD?  
-4. Telegram allowlist: only you or family too?  
-5. Host for api/web/bot: laptop-first vs small VPS from day one?
+| Topic | Decision |
+|-------|----------|
+| Web stack | **React + Vite** SPA talking to FastAPI ? efficient interactive UI; scales by separating API/web; migrate host later without rewrite |
+| Default LLM | **NVIDIA Muse Glimmer** first; **Gemini Flash** as cheaper/fallback |
+| Monthly budget | **$5 max** hard kill-switch on paid LLM spend |
+| Users | **You only** now; allowlist supports adding more Telegram/web users later |
+| Host | **Laptop-only** for v1; design API/config so **VPS migration** is config/env, not a rewrite |
+
+*(Previously open; locked 2026-08-22.)*
 
 ---
 

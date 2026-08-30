@@ -2497,7 +2497,15 @@ def summarize_house_drishti(natal_drishti_rows, d1_house_chart, lagna_sign) -> l
     return summary
 
 
-def calculate_vedic_charts(name, dt_aware, lat, lon, gender="Unknown"):
+def calculate_vedic_charts(name, dt_aware, lat, lon, gender="Unknown", birth_place=None, timezone_name=None):
+    # Library-safe defaults: Streamlit UI may set module globals selected_city / sel_tz.
+    # API callers pass birth_place / timezone_name explicitly (or we derive from dt_aware).
+    if birth_place is None:
+        birth_place = globals().get("selected_city") or f"{lat:.4f}, {lon:.4f}"
+    if timezone_name is None:
+        timezone_name = globals().get("sel_tz") or (
+            str(dt_aware.tzinfo) if getattr(dt_aware, "tzinfo", None) else "UTC"
+        )
     # Standardize Ayanamsa: Use KRISHNAMURTI_VP291 for better AstroSage alignment
     # Alternative (not used here): swe.SIDM_TRUE_CITRA anchors zodiac to star Spica
     swe.set_sid_mode(getattr(swe, "SIDM_KRISHNAMURTI_VP291", 45), 0, 0)
@@ -3730,8 +3738,8 @@ def calculate_vedic_charts(name, dt_aware, lat, lon, gender="Unknown"):
         "name": name,
         "gender": gender,
         "birth_datetime": dt_aware.isoformat(),
-        "birth_place": selected_city if selected_city else "Default Location",
-        "timezone": sel_tz,
+        "birth_place": birth_place if birth_place else "Default Location",
+        "timezone": timezone_name,
         "lagna_sign": asc_sign_name,
         "lagna_nakshatra": asc_nak,
         "moon_sign": ZODIAC_SIGNS[planet_sign_index.get("Moon", 0)],
@@ -3985,806 +3993,810 @@ def calculate_vedic_charts(name, dt_aware, lat, lon, gender="Unknown"):
 # 3. WEB INTERFACE
 # ==========================================
 
-st.set_page_config(page_title="Vedic Calculation Engine", page_icon="🕉️", layout="wide")
-st.title("🕉️ Vedic Chart Calculator")
-st.markdown("Generates **Brahma-Daivagya** Prompt with **Time Variables & Strengths**.")
+# Runs only under `streamlit run astro_kp.py` / python astro_kp.py.
+# When imported by api/ or astro_kp_v2, skip UI side effects.
+if __name__ == "__main__":
 
-col1, col2 = st.columns(2)
-with col1:
-    name = st.text_input("Name", value="", placeholder="Enter name")
-    dob = st.date_input("Date of Birth", value=None, min_value=datetime.date(1910, 1, 1))
-    gender = st.selectbox("Gender", ["", "Male", "Female", "Other"], index=0) 
+    st.set_page_config(page_title="Vedic Calculation Engine", page_icon="🕉️", layout="wide")
+    st.title("🕉️ Vedic Chart Calculator")
+    st.markdown("Generates **Brahma-Daivagya** Prompt with **Time Variables & Strengths**.")
 
-with col2:
-    # Custom time input with validation
-    st.markdown("**Time of Birth**")
-    time_col1, time_col2 = st.columns(2)
-    with time_col1:
-        hour = st.number_input("Hour (0-23)", min_value=0, max_value=23, value=None, step=1, help="Enter hour (0-23)")
-    with time_col2:
-        minute = st.number_input("Minute (0-59)", min_value=0, max_value=59, value=None, step=1, help="Enter minute (0-59)")
-    
-    # Create time object if both are provided
-    if hour is not None and minute is not None:
-        tob = datetime.time(hour, minute)
-    else:
-        tob = None
+    col1, col2 = st.columns(2)
+    with col1:
+        name = st.text_input("Name", value="", placeholder="Enter name")
+        dob = st.date_input("Date of Birth", value=None, min_value=datetime.date(1910, 1, 1))
+        gender = st.selectbox("Gender", ["", "Male", "Female", "Other"], index=0) 
 
-# Location
-df_cities = load_city_data()
-lat, lon = None, None
+    with col2:
+        # Custom time input with validation
+        st.markdown("**Time of Birth**")
+        time_col1, time_col2 = st.columns(2)
+        with time_col1:
+            hour = st.number_input("Hour (0-23)", min_value=0, max_value=23, value=None, step=1, help="Enter hour (0-23)")
+        with time_col2:
+            minute = st.number_input("Minute (0-59)", min_value=0, max_value=59, value=None, step=1, help="Enter minute (0-59)")
 
-st.write("---")
-st.markdown("### 🌍 Location Search (Required for Ishtakala)")
-selected_city = None
-
-# High-Performance Indexed Search using streamlit-searchbox (if available)
-if df_cities is not None and not df_cities.empty:
-    city_index = build_city_index(df_cities)
-
-    col_city1, col_city2 = st.columns(2)
-
-    with col_city1:
-        if HAS_SEARCHBOX:
-            st.caption("🔎 Fast search (recommended)")
-
-            def search_function(search_term):
-                return search_city(search_term, city_index)
-
-            selected_result = st_searchbox(
-                search_function,
-                key="city_searchbox",
-                placeholder="Type city name (min 3 characters)...",
-                label="Search City:",
-            )
-
-            if selected_result:
-                if isinstance(selected_result, tuple) and len(selected_result) == 2:
-                    lat, lon = selected_result
-                    matching_rows = df_cities[
-                        (abs(df_cities["latitude"] - lat) < 0.0001)
-                        & (abs(df_cities["longitude"] - lon) < 0.0001)
-                    ]
-                    if not matching_rows.empty:
-                        selected_city = matching_rows.iloc[0]["display_name"]
-                        st.success(f"Selected: {selected_city} ({lat:.4f}, {lon:.4f})")
-                    else:
-                        st.warning("City coordinates found but display name not matched.")
-                else:
-                    st.error("Unexpected result format from searchbox.")
+        # Create time object if both are provided
+        if hour is not None and minute is not None:
+            tob = datetime.time(hour, minute)
         else:
-            st.caption("🔎 Fast search is unavailable (dependency missing).")
+            tob = None
 
-    # Always offer a simple dropdown as a fallback / alternative
-    with col_city2:
-        st.caption("📂 Simple dropdown (type to filter)")
-        city_list: list[str] = [""] + df_cities["display_name"].tolist()
-        dropdown_city = st.selectbox(
-            "Select City:",
-            city_list,
-            index=0,
-            help="Start typing the city name to filter the list.",
-            key="city_selectbox",
-        )
-        if dropdown_city:
-            row = df_cities[df_cities["display_name"] == dropdown_city].iloc[0]
-            lat, lon = float(row["latitude"]), float(row["longitude"])
-            selected_city = dropdown_city
-            st.success(f"Selected: {selected_city} ({lat:.4f}, {lon:.4f})")
+    # Location
+    df_cities = load_city_data()
+    lat, lon = None, None
 
-# Manual Override
-with st.expander("📍 Manual Coordinates"):
-    lat = st.number_input("Lat", value=lat if lat else 0.0, format="%.4f")
-    lon = st.number_input("Lon", value=lon if lon else 0.0, format="%.4f")
+    st.write("---")
+    st.markdown("### 🌍 Location Search (Required for Ishtakala)")
+    selected_city = None
 
-st.write("---")
-st.subheader("🕒 Timezone")
-common_tz = ["Asia/Kolkata", "UTC", "America/New_York", "Europe/London", "Australia/Sydney"]
-sel_tz = st.selectbox("Select Timezone:", common_tz, index=0)
+    # High-Performance Indexed Search using streamlit-searchbox (if available)
+    if df_cities is not None and not df_cities.empty:
+        city_index = build_city_index(df_cities)
 
-st.write("---")
-st.subheader("⚙️ Options")
-include_structured_json = st.checkbox("Include Structured JSON Payload (for LLM)", value=False)
+        col_city1, col_city2 = st.columns(2)
 
-if st.button("Generate Prompt"):
-    # Check if all fields are empty
-    name_empty = not name or name.strip() == ""
-    dob_empty = dob is None  # Check if date is None
-    tob_empty = tob is None  # Check if time is None
-    location_empty = (lat is None or lat == 0.0) and (lon is None or lon == 0.0)
-    
-    # Check if ANY field has data
-    has_any_data = not name_empty or not dob_empty or not tob_empty or not location_empty
-    
-    # If everything is empty, show only headers
-    if name_empty and dob_empty and tob_empty and location_empty:
-        final_prompt = """SYSTEM ROLE: 'BRAHMA-DAIVAGYA' (The Vedic Calculator & Seer)
+        with col_city1:
+            if HAS_SEARCHBOX:
+                st.caption("🔎 Fast search (recommended)")
 
-I. CONTEXT & DATA SOURCE
-You are the Brahma-Daivagya. Use the provided MASTER DATA PACKET to perform "Hit Theory" analysis.
-Do not calculate planetary degrees. Use the pre-calculated values below.
+                def search_function(search_term):
+                    return search_city(search_term, city_index)
 
-*** MASTER DATA PACKET (PRE-CALCULATED) ***
+                selected_result = st_searchbox(
+                    search_function,
+                    key="city_searchbox",
+                    placeholder="Type city name (min 3 characters)...",
+                    label="Search City:",
+                )
 
-1. NATAL CHART (Hardware):
+                if selected_result:
+                    if isinstance(selected_result, tuple) and len(selected_result) == 2:
+                        lat, lon = selected_result
+                        matching_rows = df_cities[
+                            (abs(df_cities["latitude"] - lat) < 0.0001)
+                            & (abs(df_cities["longitude"] - lon) < 0.0001)
+                        ]
+                        if not matching_rows.empty:
+                            selected_city = matching_rows.iloc[0]["display_name"]
+                            st.success(f"Selected: {selected_city} ({lat:.4f}, {lon:.4f})")
+                        else:
+                            st.warning("City coordinates found but display name not matched.")
+                    else:
+                        st.error("Unexpected result format from searchbox.")
+            else:
+                st.caption("🔎 Fast search is unavailable (dependency missing).")
 
+        # Always offer a simple dropdown as a fallback / alternative
+        with col_city2:
+            st.caption("📂 Simple dropdown (type to filter)")
+            city_list: list[str] = [""] + df_cities["display_name"].tolist()
+            dropdown_city = st.selectbox(
+                "Select City:",
+                city_list,
+                index=0,
+                help="Start typing the city name to filter the list.",
+                key="city_selectbox",
+            )
+            if dropdown_city:
+                row = df_cities[df_cities["display_name"] == dropdown_city].iloc[0]
+                lat, lon = float(row["latitude"]), float(row["longitude"])
+                selected_city = dropdown_city
+                st.success(f"Selected: {selected_city} ({lat:.4f}, {lon:.4f})")
 
-2. SPECIAL POINTS (Vulnerable Spots):
-- 64th Navamsa Sign: 
-- 22nd Drekkana Sign: 
-- Upagrahas:
+    # Manual Override
+    with st.expander("📍 Manual Coordinates"):
+        lat = st.number_input("Lat", value=lat if lat else 0.0, format="%.4f")
+        lon = st.number_input("Lon", value=lon if lon else 0.0, format="%.4f")
 
+    st.write("---")
+    st.subheader("🕒 Timezone")
+    common_tz = ["Asia/Kolkata", "UTC", "America/New_York", "Europe/London", "Australia/Sydney"]
+    sel_tz = st.selectbox("Select Timezone:", common_tz, index=0)
 
-3. ASHTAKAVARGA (Bhinna + Sarva):
+    st.write("---")
+    st.subheader("⚙️ Options")
+    include_structured_json = st.checkbox("Include Structured JSON Payload (for LLM)", value=False)
 
-(Rule: SAV >28 = Strong sign, SAV <25 = Vulnerable sign)
+    if st.button("Generate Prompt"):
+        # Check if all fields are empty
+        name_empty = not name or name.strip() == ""
+        dob_empty = dob is None  # Check if date is None
+        tob_empty = tob is None  # Check if time is None
+        location_empty = (lat is None or lat == 0.0) and (lon is None or lon == 0.0)
 
-4. CURRENT TIMING (Software - Dasha System):
+        # Check if ANY field has data
+        has_any_data = not name_empty or not dob_empty or not tob_empty or not location_empty
 
-(Note: Hit Theory is the "Trigger," but Dasha is the "Gun." A hit usually doesn't manifest unless the Dasha Lord is involved.)
-
-5. TIME VARIABLES:
-- Birth Ghati: 
-- Day Duration: 
-- Planetary Avasthas (Moods):
-
-
-6. PANCHANG (Five Limbs of Time):
-
-- Tithi: Crucial for relationship and emotional depth
-- Yoga: Crucial for health and innate nature
-- Karana: Crucial for career/work success
-
-7. TRANSIT SNAPSHOT (Current Real-Time Positions):
-As of: 
-
-(Logic: If Transit Planet hits Natal Planet within 3 deg, it is a significant event. Retrograde planets hitting natal points are MORE POTENT (karmic/repetitive) than direct ones. All planets are checked for hits, not just slow planets.)
-
-8. D1 HOUSE CHART (Rashi - Whole Sign):
-
-
-9. BHAVA CHALIT CHART (Sripati - House Shifts):
-
-(Note: If a planet shows "[Rashi HX → Bhava HY]", it has shifted houses. This is critical for prediction.)
-
-10. SHODASHAVARGA MATRIX (16 CHARTS):
-
-
-11. VIMSHOTTARI DASHA TIMELINE (Full 80-Year Projection):
-
-
-12. BNN MODULE (Bhrigu Nandi Nadi - Geometry-Based Analysis):
-
-
-Lagna Summary: 
-Moon Nakshatra: 
-
-Name: 
-Gender: 
-Date: 
-Time: 
-Place: 
-Timezone: 
-
-INSTRUCTION:
-"O Brahma-Daivagya, align the heavens using the Master Data Packet.
-1. Cross-reference the Transit Snapshot with the Natal Chart to find specific hits.
-2. If a hit occurs, check the SAV score of that sign.
-3. Check if the planet involves the 64th Navamsa or 22nd Drekkana.
-4. Note: Eclipse status checks the middle of the month; precise dates may vary by +/- 14 days.
-5. Synthesize the prediction.
-"""
-        st.subheader("Copy This Prompt:")
-        st.code(final_prompt, language="markdown")
-    else:
-        # If any field has data, require all fields and calculate
-        # If name is empty, do NOT use defaults - show only headers
-        if name_empty or not name or name.strip() == "":
-            # No defaults - show blank headers only
+        # If everything is empty, show only headers
+        if name_empty and dob_empty and tob_empty and location_empty:
             final_prompt = """SYSTEM ROLE: 'BRAHMA-DAIVAGYA' (The Vedic Calculator & Seer)
 
-I. CONTEXT & DATA SOURCE
-You are the Brahma-Daivagya. Use the provided MASTER DATA PACKET to perform "Hit Theory" analysis.
-Do not calculate planetary degrees. Use the pre-calculated values below.
+    I. CONTEXT & DATA SOURCE
+    You are the Brahma-Daivagya. Use the provided MASTER DATA PACKET to perform "Hit Theory" analysis.
+    Do not calculate planetary degrees. Use the pre-calculated values below.
 
-*** MASTER DATA PACKET (PRE-CALCULATED) ***
+    *** MASTER DATA PACKET (PRE-CALCULATED) ***
 
-1. NATAL CHART (Hardware):
-
-
-2. SPECIAL POINTS (Vulnerable Spots):
-- 64th Navamsa Sign: 
-- 22nd Drekkana Sign: 
-- Upagrahas:
+    1. NATAL CHART (Hardware):
 
 
-3. ASHTAKAVARGA (Bhinna + Sarva):
-
-(Rule: SAV >28 = Strong sign, SAV <25 = Vulnerable sign)
-
-4. CURRENT TIMING (Software - Dasha System):
-
-(Note: Hit Theory is the "Trigger," but Dasha is the "Gun." A hit usually doesn't manifest unless the Dasha Lord is involved.)
-
-5. TIME VARIABLES:
-- Birth Ghati: 
-- Day Duration: 
-- Planetary Avasthas (Moods):
+    2. SPECIAL POINTS (Vulnerable Spots):
+    - 64th Navamsa Sign: 
+    - 22nd Drekkana Sign: 
+    - Upagrahas:
 
 
-6. PANCHANG (Five Limbs of Time):
+    3. ASHTAKAVARGA (Bhinna + Sarva):
 
-- Tithi: Crucial for relationship and emotional depth
-- Yoga: Crucial for health and innate nature
-- Karana: Crucial for career/work success
+    (Rule: SAV >28 = Strong sign, SAV <25 = Vulnerable sign)
 
-7. TRANSIT SNAPSHOT (Current Real-Time Positions):
-As of: 
+    4. CURRENT TIMING (Software - Dasha System):
 
-(Logic: If Transit Planet hits Natal Planet within 3 deg, it is a significant event. Retrograde planets hitting natal points are MORE POTENT (karmic/repetitive) than direct ones. All planets are checked for hits, not just slow planets.)
+    (Note: Hit Theory is the "Trigger," but Dasha is the "Gun." A hit usually doesn't manifest unless the Dasha Lord is involved.)
 
-8. D1 HOUSE CHART (Rashi - Whole Sign):
-
-
-9. BHAVA CHALIT CHART (Sripati - House Shifts):
-
-(Note: If a planet shows "[Rashi HX → Bhava HY]", it has shifted houses. This is critical for prediction.)
-
-10. SHODASHAVARGA MATRIX (16 CHARTS):
+    5. TIME VARIABLES:
+    - Birth Ghati: 
+    - Day Duration: 
+    - Planetary Avasthas (Moods):
 
 
-11. VIMSHOTTARI DASHA TIMELINE (Full 80-Year Projection):
+    6. PANCHANG (Five Limbs of Time):
+
+    - Tithi: Crucial for relationship and emotional depth
+    - Yoga: Crucial for health and innate nature
+    - Karana: Crucial for career/work success
+
+    7. TRANSIT SNAPSHOT (Current Real-Time Positions):
+    As of: 
+
+    (Logic: If Transit Planet hits Natal Planet within 3 deg, it is a significant event. Retrograde planets hitting natal points are MORE POTENT (karmic/repetitive) than direct ones. All planets are checked for hits, not just slow planets.)
+
+    8. D1 HOUSE CHART (Rashi - Whole Sign):
 
 
-12. BNN MODULE (Bhrigu Nandi Nadi - Geometry-Based Analysis):
+    9. BHAVA CHALIT CHART (Sripati - House Shifts):
+
+    (Note: If a planet shows "[Rashi HX → Bhava HY]", it has shifted houses. This is critical for prediction.)
+
+    10. SHODASHAVARGA MATRIX (16 CHARTS):
 
 
-Lagna Summary: 
-Moon Nakshatra: 
+    11. VIMSHOTTARI DASHA TIMELINE (Full 80-Year Projection):
 
-Name: 
-Gender: 
-Date: 
-Time: 
-Place: 
-Timezone: 
 
-INSTRUCTION:
-"O Brahma-Daivagya, align the heavens using the Master Data Packet.
-1. Cross-reference the Transit Snapshot with the Natal Chart to find specific hits.
-2. If a hit occurs, check the SAV score of that sign.
-3. Check if the planet involves the 64th Navamsa or 22nd Drekkana.
-4. Note: Eclipse status checks the middle of the month; precise dates may vary by +/- 14 days.
-5. Synthesize the prediction.
-"""
+    12. BNN MODULE (Bhrigu Nandi Nadi - Geometry-Based Analysis):
+
+
+    Lagna Summary: 
+    Moon Nakshatra: 
+
+    Name: 
+    Gender: 
+    Date: 
+    Time: 
+    Place: 
+    Timezone: 
+
+    INSTRUCTION:
+    "O Brahma-Daivagya, align the heavens using the Master Data Packet.
+    1. Cross-reference the Transit Snapshot with the Natal Chart to find specific hits.
+    2. If a hit occurs, check the SAV score of that sign.
+    3. Check if the planet involves the 64th Navamsa or 22nd Drekkana.
+    4. Note: Eclipse status checks the middle of the month; precise dates may vary by +/- 14 days.
+    5. Synthesize the prediction.
+    """
             st.subheader("Copy This Prompt:")
             st.code(final_prompt, language="markdown")
         else:
-            # Name is present - use defaults for coordinates if needed, then calculate
-            if lat is None or lat == 0.0:
-                lat = 28.6139  # Default: New Delhi
-            if lon is None or lon == 0.0:
-                lon = 77.2090  # Default: New Delhi
-            if selected_city is None:
-                selected_city = ""
-            
-            # Validate required fields before proceeding
-            if dob is None:
-                st.error("Date of Birth is required. Please enter a valid date.")
-                st.stop()
-            if tob is None:
-                st.error("Time of Birth is required. Please enter both hour and minute.")
-                st.stop()
-            
-            # Show all actual values
-            name_display = name
-            gender_display = gender
-            dob_display = dob.strftime('%d/%m/%Y')
-            tob_display = tob.strftime('%H:%M')
-            place_display = selected_city if selected_city else 'Default Location'
-            timezone_display = sel_tz
-            
-            local_tz = pytz.timezone(sel_tz)
-            dt_naive = datetime.datetime.combine(dob, tob)
-            dt_aware = local_tz.localize(dt_naive)
-            
-            # Calculate All with renamed function
-            (lagna, d1, d9, bhava_chalit, vargas, nak, ishta, dinamaana, sav, avasthas, upagrahas, 
-             d64, d22, transits, transit_timestamp_utc, natal_table, dasha_info, panchang_info, timeline_full, full_timeline_data, structured_payload, bnn_display_str, unified_kundali) = calculate_vedic_charts(name_display, dt_aware, lat, lon)
-            
-            # Convert transit timestamp to user's timezone
-            transit_timestamp = transit_timestamp_utc.astimezone(local_tz).strftime("%Y-%m-%d %H:%M:%S %Z")
-            
-            # Store all calculation results in session_state to persist across reruns
-            st.session_state.calc_results = {
-                'lagna': lagna,
-                'd1': d1,
-                'd9': d9,
-                'bhava_chalit': bhava_chalit,
-                'vargas': vargas,
-                'nak': nak,
-                'ishta': ishta,
-                'dinamaana': dinamaana,
-                'sav': sav,
-                'avasthas': avasthas,
-                'upagrahas': upagrahas,
-                'd64': d64,
-                'd22': d22,
-                'transits': transits,
-                'transit_timestamp': transit_timestamp,
-                'natal_table': natal_table,
-                'dasha_info': dasha_info,
-                'panchang_info': panchang_info,
-                'timeline_full': timeline_full,
-                'full_timeline_data': full_timeline_data,
-                'structured_payload': structured_payload,
-                'bnn_display_str': bnn_display_str,
-                'unified_kundali': unified_kundali,
-                'name_display': name_display,
-                'gender_display': gender_display,
-                'dob_display': dob_display,
-                'tob_display': tob_display,
-                'place_display': place_display,
-                'timezone_display': timezone_display,
-            }
-            
-            
-            # Calculate total SAV score from the Total row in the BAV/SAV table
-            _total_line = [ln for ln in sav.split('\n') if 'Total' in ln]
-            total_sav_score = sum(int(n) for n in re.findall(r'\d+', _total_line[0])) if _total_line else 0
-            
-            # Extract BNN Kundali only (Directional Groups and Orbital Order)
-            bnn_lines = bnn_display_str.split('\n')
-            bnn_kundali_lines = []
-            in_kundali_section = False
-            for line in bnn_lines:
-                if "DIRECTIONAL GROUPS" in line:
-                    in_kundali_section = True
-                    bnn_kundali_lines.append(line)
-                elif "ORBITAL ORDER" in line:
-                    in_kundali_section = True
-                    bnn_kundali_lines.append(line)
-                elif in_kundali_section:
-                    if line.startswith("###") and "RETROGRADE" in line:
-                        break
-                    bnn_kundali_lines.append(line)
-            bnn_kundali_only = "\n".join(bnn_kundali_lines) if bnn_kundali_lines else "No BNN Kundali data available"
-            
-            # Format full timeline
-            full_timeline_rows = []
-            full_timeline_rows.append("| Start (Solar) | End (Solar) | Start (Savana) | End (Savana) | MD | AD | PD | Duration (Days) |")
-            full_timeline_rows.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
-            for entry in full_timeline_data:
-                full_timeline_rows.append(f"| {entry.get('start_solar', 'N/A')} | {entry.get('end_solar', 'N/A')} | {entry.get('start_savana', 'N/A')} | {entry.get('end_savana', 'N/A')} | {entry['md']} | {entry['ad']} | {entry['pd']} | {entry.get('duration_solar_days', 0):.1f} |")
-            full_timeline_table = "\n".join(full_timeline_rows)
-            
-            # Build three separate sections
-            # Section 1: Charts
-            charts_section = f"""SYSTEM ROLE: 'BRAHMA-DAIVAGYA' (The Vedic Calculator & Seer)
+            # If any field has data, require all fields and calculate
+            # If name is empty, do NOT use defaults - show only headers
+            if name_empty or not name or name.strip() == "":
+                # No defaults - show blank headers only
+                final_prompt = """SYSTEM ROLE: 'BRAHMA-DAIVAGYA' (The Vedic Calculator & Seer)
 
-I. CHARTS SECTION
+    I. CONTEXT & DATA SOURCE
+    You are the Brahma-Daivagya. Use the provided MASTER DATA PACKET to perform "Hit Theory" analysis.
+    Do not calculate planetary degrees. Use the pre-calculated values below.
 
-1. NATAL CHART (Hardware):
-{natal_table}
+    *** MASTER DATA PACKET (PRE-CALCULATED) ***
 
-8. D1 HOUSE CHART (Rashi - Whole Sign):
-{d1}
+    1. NATAL CHART (Hardware):
 
-9. BHAVA CHALIT CHART (Sripati - House Shifts):
-{bhava_chalit}
-(Note: If a planet shows "[Rashi HX → Bhava HY]", it has shifted houses. This is critical for prediction.)
 
-10. SHODASHAVARGA MATRIX (16 CHARTS):
-{vargas}
+    2. SPECIAL POINTS (Vulnerable Spots):
+    - 64th Navamsa Sign: 
+    - 22nd Drekkana Sign: 
+    - Upagrahas:
 
-13. UNIFIED BNN-PARASHARI KUNDALI (The Snapshot):
-{unified_kundali}
-(Note: This table uses Whole Sign Houses (Rashi = House) for BNN geometry compatibility. Bhava Shift markers [→ HX] indicate planets that moved to different houses in Bhava Chalit chart. For Direction/Trines (BNN), use the Sign column. For Career/Outcome (Parashari), check Bhava Shift if present.)
 
-14. BNN KUNDALI ONLY:
-{bnn_kundali_only}
+    3. ASHTAKAVARGA (Bhinna + Sarva):
 
-Lagna Summary: {lagna}
-Moon Nakshatra: {nak}
+    (Rule: SAV >28 = Strong sign, SAV <25 = Vulnerable sign)
 
-Name: {name_display}
-Gender: {gender_display}
-Date: {dob_display}
-Time: {tob_display}
-Place: {place_display}
-Timezone: {timezone_display}
-"""
-            
-            # Section 2: Inner Calculations
-            inner_calculations_section = f"""SYSTEM ROLE: 'BRAHMA-DAIVAGYA' (The Vedic Calculator & Seer)
+    4. CURRENT TIMING (Software - Dasha System):
 
-II. INNER CALCULATIONS SECTION
+    (Note: Hit Theory is the "Trigger," but Dasha is the "Gun." A hit usually doesn't manifest unless the Dasha Lord is involved.)
 
-2. SPECIAL POINTS (Vulnerable Spots):
-- 64th Navamsa Sign: {d64}
-- 22nd Drekkana Sign: {d22}
-- Upagrahas:
-{upagrahas}
+    5. TIME VARIABLES:
+    - Birth Ghati: 
+    - Day Duration: 
+    - Planetary Avasthas (Moods):
 
-3. ASHTAKAVARGA (Bhinna + Sarva):
-{sav}
-Total SAV Score: {total_sav_score} points
-(Rule: SAV >28 = Strong sign, SAV <25 = Vulnerable sign)
 
-4. CURRENT TIMING (Software - Dasha System):
-{dasha_info}
-(Note: Hit Theory is the "Trigger," but Dasha is the "Gun." A hit usually doesn't manifest unless the Dasha Lord is involved.)
+    6. PANCHANG (Five Limbs of Time):
 
-5. TIME VARIABLES:
-- Birth Ghati: {ishta:.2f}
-- Day Duration: {dinamaana:.2f}
-- Planetary Avasthas (Moods):
-{avasthas}
+    - Tithi: Crucial for relationship and emotional depth
+    - Yoga: Crucial for health and innate nature
+    - Karana: Crucial for career/work success
 
-6. PANCHANG (Five Limbs of Time):
-{panchang_info}
-- Tithi: Crucial for relationship and emotional depth
-- Yoga: Crucial for health and innate nature
-- Karana: Crucial for career/work success
+    7. TRANSIT SNAPSHOT (Current Real-Time Positions):
+    As of: 
 
-7. TRANSIT SNAPSHOT (Current Real-Time Positions):
-As of: {transit_timestamp}
-{transits}
-(Logic: If Transit Planet hits Natal Planet within 3 deg, it is a significant event. Retrograde planets hitting natal points are MORE POTENT (karmic/repetitive) than direct ones. All planets are checked for hits, not just slow planets.)
+    (Logic: If Transit Planet hits Natal Planet within 3 deg, it is a significant event. Retrograde planets hitting natal points are MORE POTENT (karmic/repetitive) than direct ones. All planets are checked for hits, not just slow planets.)
 
-12. BNN MODULE (Bhrigu Nandi Nadi - Geometry-Based Analysis):
-{bnn_display_str}
-(Note: BNN uses Directional Grouping and Orbital Order instead of House-based analysis. Retrograde planets project into previous sign. Friend/Enemy relationships follow Deva/Asura groups, not Parashari Tatkalik Maitri.)
+    8. D1 HOUSE CHART (Rashi - Whole Sign):
 
-Name: {name_display}
-Gender: {gender_display}
-Date: {dob_display}
-Time: {tob_display}
-Place: {place_display}
-Timezone: {timezone_display}
-"""
-            
-            # Section 3: Timeline (will be updated based on toggle)
-            timeline_section_base = f"""SYSTEM ROLE: 'BRAHMA-DAIVAGYA' (The Vedic Calculator & Seer)
 
-III. VIMSHOTTARI DASHA TIMELINE SECTION
+    9. BHAVA CHALIT CHART (Sripati - House Shifts):
 
-11. VIMSHOTTARI DASHA TIMELINE (Full 80-Year Projection):
+    (Note: If a planet shows "[Rashi HX → Bhava HY]", it has shifted houses. This is critical for prediction.)
 
-"""
-            
-            # Original final_prompt for backward compatibility (if needed)
-            final_prompt = f"""SYSTEM ROLE: 'BRAHMA-DAIVAGYA' (The Vedic Calculator & Seer)
+    10. SHODASHAVARGA MATRIX (16 CHARTS):
 
-I. CONTEXT & DATA SOURCE
-You are the Brahma-Daivagya. Use the provided MASTER DATA PACKET to perform "Hit Theory" analysis.
-Do not calculate planetary degrees. Use the pre-calculated values below.
 
-*** MASTER DATA PACKET (PRE-CALCULATED) ***
+    11. VIMSHOTTARI DASHA TIMELINE (Full 80-Year Projection):
 
-1. NATAL CHART (Hardware):
-{natal_table}
 
-2. SPECIAL POINTS (Vulnerable Spots):
-- 64th Navamsa Sign: {d64}
-- 22nd Drekkana Sign: {d22}
-- Upagrahas:
-{upagrahas}
+    12. BNN MODULE (Bhrigu Nandi Nadi - Geometry-Based Analysis):
 
-3. ASHTAKAVARGA (Bhinna + Sarva):
-{sav}
-(Rule: SAV >28 = Strong sign, SAV <25 = Vulnerable sign)
 
-4. CURRENT TIMING (Software - Dasha System):
-{dasha_info}
-(Note: Hit Theory is the "Trigger," but Dasha is the "Gun." A hit usually doesn't manifest unless the Dasha Lord is involved.)
+    Lagna Summary: 
+    Moon Nakshatra: 
 
-5. TIME VARIABLES:
-- Birth Ghati: {ishta:.2f}
-- Day Duration: {dinamaana:.2f}
-- Planetary Avasthas (Moods):
-{avasthas}
+    Name: 
+    Gender: 
+    Date: 
+    Time: 
+    Place: 
+    Timezone: 
 
-6. PANCHANG (Five Limbs of Time):
-{panchang_info}
-- Tithi: Crucial for relationship and emotional depth
-- Yoga: Crucial for health and innate nature
-- Karana: Crucial for career/work success
-
-7. TRANSIT SNAPSHOT (Current Real-Time Positions):
-As of: {transit_timestamp}
-{transits}
-(Logic: If Transit Planet hits Natal Planet within 3 deg, it is a significant event. Retrograde planets hitting natal points are MORE POTENT (karmic/repetitive) than direct ones. All planets are checked for hits, not just slow planets.)
-
-8. D1 HOUSE CHART (Rashi - Whole Sign):
-{d1}
-
-9. BHAVA CHALIT CHART (Sripati - House Shifts):
-{bhava_chalit}
-(Note: If a planet shows "[Rashi HX → Bhava HY]", it has shifted houses. This is critical for prediction.)
-
-10. SHODASHAVARGA MATRIX (16 CHARTS):
-{vargas}
-
-11. VIMSHOTTARI DASHA TIMELINE (Full 80-Year Projection):
-{timeline_full}
-
-12. BNN MODULE (Bhrigu Nandi Nadi - Geometry-Based Analysis):
-{bnn_display_str}
-(Note: BNN uses Directional Grouping and Orbital Order instead of House-based analysis. Retrograde planets project into previous sign. Friend/Enemy relationships follow Deva/Asura groups, not Parashari Tatkalik Maitri.)
-
-13. UNIFIED BNN-PARASHARI KUNDALI (The Snapshot):
-{unified_kundali}
-(Note: This table uses Whole Sign Houses (Rashi = House) for BNN geometry compatibility. Bhava Shift markers [→ HX] indicate planets that moved to different houses in Bhava Chalit chart. For Direction/Trines (BNN), use the Sign column. For Career/Outcome (Parashari), check Bhava Shift if present.)
-
-Lagna Summary: {lagna}
-Moon Nakshatra: {nak}
-
-Name: {name_display}
-Gender: {gender_display}
-Date: {dob_display}
-Time: {tob_display}
-Place: {place_display}
-Timezone: {timezone_display}
-
-INSTRUCTION:
-"O Brahma-Daivagya, align the heavens using the Master Data Packet.
-1. Cross-reference the Transit Snapshot with the Natal Chart to find specific hits.
-2. If a hit occurs, check the SAV score of that sign.
-3. Check if the planet involves the 64th Navamsa or 22nd Drekkana.
-4. Note: Eclipse status checks the middle of the month; precise dates may vary by +/- 14 days.
-5. Synthesize the prediction.
-"""
-            # Hack to inject the variable inside f-string locally
-            final_prompt = final_prompt.replace("{natal_table}", natal_table)
-            
-            # Implement Exclusive Output Switch
-            if include_structured_json:
-                # Optional: Advanced Condensing Logic - Remove None/empty string values
-                def remove_null_values(obj):
-                    """Recursively remove keys with None or empty string values (lossless minification)."""
-                    if isinstance(obj, dict):
-                        return {k: remove_null_values(v) for k, v in obj.items() 
-                                if v is not None and v != ""}
-                    elif isinstance(obj, list):
-                        return [remove_null_values(item) for item in obj]
-                    return obj
-                
-                # Apply condensing (optional - can be disabled if needed)
-                condensed_payload = remove_null_values(structured_payload)
-                
-                # Smart Compression: Lossless Minification (no indent, compact separators)
-                json_str = json.dumps(condensed_payload, separators=(',', ':'), ensure_ascii=False)
-                
-                # Exclusive mode: Only JSON, no text prompt
-                final_prompt = json_str
+    INSTRUCTION:
+    "O Brahma-Daivagya, align the heavens using the Master Data Packet.
+    1. Cross-reference the Transit Snapshot with the Natal Chart to find specific hits.
+    2. If a hit occurs, check the SAV score of that sign.
+    3. Check if the planet involves the 64th Navamsa or 22nd Drekkana.
+    4. Note: Eclipse status checks the middle of the month; precise dates may vary by +/- 14 days.
+    5. Synthesize the prediction.
+    """
+                st.subheader("Copy This Prompt:")
+                st.code(final_prompt, language="markdown")
             else:
-                # Standard mode: Add structured JSON if requested (legacy behavior)
-                # Note: This branch is now only for backward compatibility
-                # The exclusive switch above handles the JSON-only mode
-                pass
-            
-            # Sidebar for full timeline reference (only show if we have calculated data)
-            if 'calc_results' in st.session_state:
-                with st.sidebar:
-                    st.markdown("### 📅 Full Dasha Timeline Reference")
-                    if st.button("Show All Mahadasha & Antardasha", key="show_full_timeline_sidebar"):
-                        st.session_state['show_timeline_sidebar'] = True
-                    
-                    if st.session_state.get('show_timeline_sidebar', False):
-                        st.markdown("**Full 80-Year Timeline (All Entries)**")
-                        # Format full timeline from stored data
-                        calc_sidebar = st.session_state.calc_results
-                        full_timeline_rows = []
-                        full_timeline_rows.append("| Start (Solar) | End (Solar) | Start (Savana) | End (Savana) | MD | AD | PD |")
-                        full_timeline_rows.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
-                        for entry in calc_sidebar['full_timeline_data'][:500]:  # Limit to 500 for performance
-                            full_timeline_rows.append(f"| {entry.get('start_solar', 'N/A')} | {entry.get('end_solar', 'N/A')} | {entry.get('start_savana', 'N/A')} | {entry.get('end_savana', 'N/A')} | {entry['md']} | {entry['ad']} | {entry['pd']} |")
-                        full_timeline_table_sidebar = "\n".join(full_timeline_rows)
-                        st.markdown(full_timeline_table_sidebar)
-                        if st.button("Close Timeline", key="close_timeline"):
-                            st.session_state['show_timeline_sidebar'] = False
+                # Name is present - use defaults for coordinates if needed, then calculate
+                if lat is None or lat == 0.0:
+                    lat = 28.6139  # Default: New Delhi
+                if lon is None or lon == 0.0:
+                    lon = 77.2090  # Default: New Delhi
+                if selected_city is None:
+                    selected_city = ""
 
-            # Results are stored in session_state above - display logic is handled outside button block
+                # Validate required fields before proceeding
+                if dob is None:
+                    st.error("Date of Birth is required. Please enter a valid date.")
+                    st.stop()
+                if tob is None:
+                    st.error("Time of Birth is required. Please enter both hour and minute.")
+                    st.stop()
 
-# Display logic OUTSIDE button block - always runs, even when checkboxes are toggled
-# This ensures data persists when toggling sections
-if 'calc_results' in st.session_state:
-    calc = st.session_state.calc_results
-    
-    # Initialize session state for section visibility and timeline toggle
-    if 'show_charts' not in st.session_state:
-        st.session_state.show_charts = True
-    if 'show_inner_calculations' not in st.session_state:
-        st.session_state.show_inner_calculations = True
-    if 'show_timeline' not in st.session_state:
-        st.session_state.show_timeline = True
-    if 'show_full_timeline' not in st.session_state:
-        st.session_state.show_full_timeline = False
-    
-    # Section filter checkboxes - placed right after Generate Prompt button area
-    st.write("---")
-    st.caption("🔍 Filter sections to show/hide in the complete prompt below:")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.session_state.show_charts = st.checkbox("📊 Show Charts (Sections 1, 8, 9, 10, 13)", value=st.session_state.show_charts, key="cb_charts")
-    with col2:
-        st.session_state.show_inner_calculations = st.checkbox("🔬 Show Inner Calculations (Sections 2, 3, 4, 5, 6, 7, 12)", value=st.session_state.show_inner_calculations, key="cb_inner")
-    with col3:
-        st.session_state.show_timeline = st.checkbox("📅 Show Timeline (Section 11)", value=st.session_state.show_timeline, key="cb_timeline")
-    
-    # Timeline toggle (only shown if timeline section is selected)
-    if st.session_state.show_timeline:
-        st.session_state.show_full_timeline = st.checkbox("Show Full 80-Year Timeline", value=st.session_state.show_full_timeline, key="cb_full_timeline")
-    
-    
-    # Rebuild total SAV score from the Total row in the BAV/SAV table
-    _total_line = [ln for ln in calc['sav'].split('\n') if 'Total' in ln]
-    total_sav_score = sum(int(n) for n in re.findall(r'\d+', _total_line[0])) if _total_line else 0
-    
-    # Extract BNN Kundali only
-    bnn_lines = calc['bnn_display_str'].split('\n')
-    bnn_kundali_lines = []
-    in_kundali_section = False
-    for line in bnn_lines:
-        if "DIRECTIONAL GROUPS" in line:
-            in_kundali_section = True
-            bnn_kundali_lines.append(line)
-        elif "ORBITAL ORDER" in line:
-            in_kundali_section = True
-            bnn_kundali_lines.append(line)
-        elif in_kundali_section:
-            if line.startswith("###") and "RETROGRADE" in line:
-                break
-            bnn_kundali_lines.append(line)
-    bnn_kundali_only = "\n".join(bnn_kundali_lines) if bnn_kundali_lines else "No BNN Kundali data available"
-    
-    # Format full timeline
-    full_timeline_rows = []
-    full_timeline_rows.append("| Start (Solar) | End (Solar) | Start (Savana) | End (Savana) | MD | AD | PD | Duration (Days) |")
-    full_timeline_rows.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
-    for entry in calc['full_timeline_data']:
-        full_timeline_rows.append(f"| {entry.get('start_solar', 'N/A')} | {entry.get('end_solar', 'N/A')} | {entry.get('start_savana', 'N/A')} | {entry.get('end_savana', 'N/A')} | {entry['md']} | {entry['ad']} | {entry['pd']} | {entry.get('duration_solar_days', 0):.1f} |")
-    full_timeline_table = "\n".join(full_timeline_rows)
-    
-    # Build sections
-    charts_section = f"""SYSTEM ROLE: 'BRAHMA-DAIVAGYA' (The Vedic Calculator & Seer)
+                # Show all actual values
+                name_display = name
+                gender_display = gender
+                dob_display = dob.strftime('%d/%m/%Y')
+                tob_display = tob.strftime('%H:%M')
+                place_display = selected_city if selected_city else 'Default Location'
+                timezone_display = sel_tz
 
-I. CHARTS SECTION
+                local_tz = pytz.timezone(sel_tz)
+                dt_naive = datetime.datetime.combine(dob, tob)
+                dt_aware = local_tz.localize(dt_naive)
 
-1. NATAL CHART (Hardware):
-{calc['natal_table']}
+                # Calculate All with renamed function
+                (lagna, d1, d9, bhava_chalit, vargas, nak, ishta, dinamaana, sav, avasthas, upagrahas, 
+                 d64, d22, transits, transit_timestamp_utc, natal_table, dasha_info, panchang_info, timeline_full, full_timeline_data, structured_payload, bnn_display_str, unified_kundali) = calculate_vedic_charts(name_display, dt_aware, lat, lon)
 
-8. D1 HOUSE CHART (Rashi - Whole Sign):
-{calc['d1']}
+                # Convert transit timestamp to user's timezone
+                transit_timestamp = transit_timestamp_utc.astimezone(local_tz).strftime("%Y-%m-%d %H:%M:%S %Z")
 
-9. BHAVA CHALIT CHART (Sripati - House Shifts):
-{calc['bhava_chalit']}
-(Note: If a planet shows "[Rashi HX → Bhava HY]", it has shifted houses. This is critical for prediction.)
+                # Store all calculation results in session_state to persist across reruns
+                st.session_state.calc_results = {
+                    'lagna': lagna,
+                    'd1': d1,
+                    'd9': d9,
+                    'bhava_chalit': bhava_chalit,
+                    'vargas': vargas,
+                    'nak': nak,
+                    'ishta': ishta,
+                    'dinamaana': dinamaana,
+                    'sav': sav,
+                    'avasthas': avasthas,
+                    'upagrahas': upagrahas,
+                    'd64': d64,
+                    'd22': d22,
+                    'transits': transits,
+                    'transit_timestamp': transit_timestamp,
+                    'natal_table': natal_table,
+                    'dasha_info': dasha_info,
+                    'panchang_info': panchang_info,
+                    'timeline_full': timeline_full,
+                    'full_timeline_data': full_timeline_data,
+                    'structured_payload': structured_payload,
+                    'bnn_display_str': bnn_display_str,
+                    'unified_kundali': unified_kundali,
+                    'name_display': name_display,
+                    'gender_display': gender_display,
+                    'dob_display': dob_display,
+                    'tob_display': tob_display,
+                    'place_display': place_display,
+                    'timezone_display': timezone_display,
+                }
 
-10. SHODASHAVARGA MATRIX (16 CHARTS):
-{calc['vargas']}
 
-13. UNIFIED BNN-PARASHARI KUNDALI (The Snapshot):
-{calc['unified_kundali']}
-(Note: This table uses Whole Sign Houses (Rashi = House) for BNN geometry compatibility. Bhava Shift markers [→ HX] indicate planets that moved to different houses in Bhava Chalit chart. For Direction/Trines (BNN), use the Sign column. For Career/Outcome (Parashari), check Bhava Shift if present.)
+                # Calculate total SAV score from the Total row in the BAV/SAV table
+                _total_line = [ln for ln in sav.split('\n') if 'Total' in ln]
+                total_sav_score = sum(int(n) for n in re.findall(r'\d+', _total_line[0])) if _total_line else 0
 
-14. BNN KUNDALI ONLY:
-{bnn_kundali_only}
+                # Extract BNN Kundali only (Directional Groups and Orbital Order)
+                bnn_lines = bnn_display_str.split('\n')
+                bnn_kundali_lines = []
+                in_kundali_section = False
+                for line in bnn_lines:
+                    if "DIRECTIONAL GROUPS" in line:
+                        in_kundali_section = True
+                        bnn_kundali_lines.append(line)
+                    elif "ORBITAL ORDER" in line:
+                        in_kundali_section = True
+                        bnn_kundali_lines.append(line)
+                    elif in_kundali_section:
+                        if line.startswith("###") and "RETROGRADE" in line:
+                            break
+                        bnn_kundali_lines.append(line)
+                bnn_kundali_only = "\n".join(bnn_kundali_lines) if bnn_kundali_lines else "No BNN Kundali data available"
 
-Lagna Summary: {calc['lagna']}
-Moon Nakshatra: {calc['nak']}
+                # Format full timeline
+                full_timeline_rows = []
+                full_timeline_rows.append("| Start (Solar) | End (Solar) | Start (Savana) | End (Savana) | MD | AD | PD | Duration (Days) |")
+                full_timeline_rows.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
+                for entry in full_timeline_data:
+                    full_timeline_rows.append(f"| {entry.get('start_solar', 'N/A')} | {entry.get('end_solar', 'N/A')} | {entry.get('start_savana', 'N/A')} | {entry.get('end_savana', 'N/A')} | {entry['md']} | {entry['ad']} | {entry['pd']} | {entry.get('duration_solar_days', 0):.1f} |")
+                full_timeline_table = "\n".join(full_timeline_rows)
 
-Name: {calc['name_display']}
-Gender: {calc['gender_display']}
-Date: {calc['dob_display']}
-Time: {calc['tob_display']}
-Place: {calc['place_display']}
-Timezone: {calc['timezone_display']}
-"""
-    
-    inner_calculations_section = f"""SYSTEM ROLE: 'BRAHMA-DAIVAGYA' (The Vedic Calculator & Seer)
+                # Build three separate sections
+                # Section 1: Charts
+                charts_section = f"""SYSTEM ROLE: 'BRAHMA-DAIVAGYA' (The Vedic Calculator & Seer)
 
-II. INNER CALCULATIONS SECTION
+    I. CHARTS SECTION
 
-2. SPECIAL POINTS (Vulnerable Spots):
-- 64th Navamsa Sign: {calc['d64']}
-- 22nd Drekkana Sign: {calc['d22']}
-- Upagrahas:
-{calc['upagrahas']}
+    1. NATAL CHART (Hardware):
+    {natal_table}
 
-3. ASHTAKAVARGA (Bhinna + Sarva):
-{calc['sav']}
-Total SAV Score: {total_sav_score} points
-(Rule: SAV >28 = Strong sign, SAV <25 = Vulnerable sign)
+    8. D1 HOUSE CHART (Rashi - Whole Sign):
+    {d1}
 
-4. CURRENT TIMING (Software - Dasha System):
-{calc['dasha_info']}
-(Note: Hit Theory is the "Trigger," but Dasha is the "Gun." A hit usually doesn't manifest unless the Dasha Lord is involved.)
+    9. BHAVA CHALIT CHART (Sripati - House Shifts):
+    {bhava_chalit}
+    (Note: If a planet shows "[Rashi HX → Bhava HY]", it has shifted houses. This is critical for prediction.)
 
-5. TIME VARIABLES:
-- Birth Ghati: {calc['ishta']:.2f}
-- Day Duration: {calc['dinamaana']:.2f}
-- Planetary Avasthas (Moods):
-{calc['avasthas']}
+    10. SHODASHAVARGA MATRIX (16 CHARTS):
+    {vargas}
 
-6. PANCHANG (Five Limbs of Time):
-{calc['panchang_info']}
-- Tithi: Crucial for relationship and emotional depth
-- Yoga: Crucial for health and innate nature
-- Karana: Crucial for career/work success
+    13. UNIFIED BNN-PARASHARI KUNDALI (The Snapshot):
+    {unified_kundali}
+    (Note: This table uses Whole Sign Houses (Rashi = House) for BNN geometry compatibility. Bhava Shift markers [→ HX] indicate planets that moved to different houses in Bhava Chalit chart. For Direction/Trines (BNN), use the Sign column. For Career/Outcome (Parashari), check Bhava Shift if present.)
 
-7. TRANSIT SNAPSHOT (Current Real-Time Positions):
-As of: {calc['transit_timestamp']}
-{calc['transits']}
-(Logic: If Transit Planet hits Natal Planet within 3 deg, it is a significant event. Retrograde planets hitting natal points are MORE POTENT (karmic/repetitive) than direct ones. All planets are checked for hits, not just slow planets.)
+    14. BNN KUNDALI ONLY:
+    {bnn_kundali_only}
 
-12. BNN MODULE (Bhrigu Nandi Nadi - Geometry-Based Analysis):
-{calc['bnn_display_str']}
-(Note: BNN uses Directional Grouping and Orbital Order instead of House-based analysis. Retrograde planets project into previous sign. Friend/Enemy relationships follow Deva/Asura groups, not Parashari Tatkalik Maitri.)
+    Lagna Summary: {lagna}
+    Moon Nakshatra: {nak}
 
-Name: {calc['name_display']}
-Gender: {calc['gender_display']}
-Date: {calc['dob_display']}
-Time: {calc['tob_display']}
-Place: {calc['place_display']}
-Timezone: {calc['timezone_display']}
-"""
-    
-    timeline_section_base = f"""SYSTEM ROLE: 'BRAHMA-DAIVAGYA' (The Vedic Calculator & Seer)
+    Name: {name_display}
+    Gender: {gender_display}
+    Date: {dob_display}
+    Time: {tob_display}
+    Place: {place_display}
+    Timezone: {timezone_display}
+    """
 
-III. VIMSHOTTARI DASHA TIMELINE SECTION
+                # Section 2: Inner Calculations
+                inner_calculations_section = f"""SYSTEM ROLE: 'BRAHMA-DAIVAGYA' (The Vedic Calculator & Seer)
 
-11. VIMSHOTTARI DASHA TIMELINE (Full 80-Year Projection):
+    II. INNER CALCULATIONS SECTION
 
-"""
-    
-    # Build complete unified prompt dynamically based on checkbox filters
-    # Update timeline section based on toggle
-    if st.session_state.show_full_timeline:
-        timeline_content = full_timeline_table
-    else:
-        timeline_content = calc['timeline_full']
-    
-    # Build sections conditionally
-    prompt_parts = []
-    prompt_parts.append("SYSTEM ROLE: 'BRAHMA-DAIVAGYA' (The Vedic Calculator & Seer)\n\nI. CONTEXT & DATA SOURCE\nYou are the Brahma-Daivagya. Use the provided MASTER DATA PACKET to perform \"Hit Theory\" analysis.\nDo not calculate planetary degrees. Use the pre-calculated values below.\n\n*** MASTER DATA PACKET (PRE-CALCULATED) ***\n\n")
-    
-    # Charts sections (1, 8, 9, 10, 13)
-    if st.session_state.show_charts:
-        prompt_parts.append(f"1. NATAL CHART (Hardware):\n{calc['natal_table']}\n\n")
-        prompt_parts.append(f"8. D1 HOUSE CHART (Rashi - Whole Sign):\n{calc['d1']}\n\n")
-        prompt_parts.append(f"9. BHAVA CHALIT CHART (Sripati - House Shifts):\n{calc['bhava_chalit']}\n(Note: If a planet shows \"[Rashi HX → Bhava HY]\", it has shifted houses. This is critical for prediction.)\n\n")
-        prompt_parts.append(f"10. SHODASHAVARGA MATRIX (16 CHARTS):\n{calc['vargas']}\n\n")
-        prompt_parts.append(f"13. UNIFIED BNN-PARASHARI KUNDALI (The Snapshot):\n{calc['unified_kundali']}\n(Note: This table uses Whole Sign Houses (Rashi = House) for BNN geometry compatibility. Bhava Shift markers [→ HX] indicate planets that moved to different houses in Bhava Chalit chart. For Direction/Trines (BNN), use the Sign column. For Career/Outcome (Parashari), check Bhava Shift if present.)\n\n")
-    
-    # Inner calculations sections (2, 3, 4, 5, 6, 7, 12)
-    if st.session_state.show_inner_calculations:
-        prompt_parts.append(f"2. SPECIAL POINTS (Vulnerable Spots):\n- 64th Navamsa Sign: {calc['d64']}\n- 22nd Drekkana Sign: {calc['d22']}\n- Upagrahas:\n{calc['upagrahas']}\n\n")
-        prompt_parts.append(f"3. ASHTAKAVARGA (Bhinna + Sarva):\n{calc['sav']}\nTotal SAV Score: {total_sav_score} points\n(Rule: SAV >28 = Strong sign, SAV <25 = Vulnerable sign)\n\n")
-        prompt_parts.append(f"4. CURRENT TIMING (Software - Dasha System):\n{calc['dasha_info']}\n(Note: Hit Theory is the \"Trigger,\" but Dasha is the \"Gun.\" A hit usually doesn't manifest unless the Dasha Lord is involved.)\n\n")
-        prompt_parts.append(f"5. TIME VARIABLES:\n- Birth Ghati: {calc['ishta']:.2f}\n- Day Duration: {calc['dinamaana']:.2f}\n- Planetary Avasthas (Moods):\n{calc['avasthas']}\n\n")
-        prompt_parts.append(f"6. PANCHANG (Five Limbs of Time):\n{calc['panchang_info']}\n- Tithi: Crucial for relationship and emotional depth\n- Yoga: Crucial for health and innate nature\n- Karana: Crucial for career/work success\n\n")
-        prompt_parts.append(f"7. TRANSIT SNAPSHOT (Current Real-Time Positions):\nAs of: {calc['transit_timestamp']}\n{calc['transits']}\n(Logic: If Transit Planet hits Natal Planet within 3 deg, it is a significant event. Retrograde planets hitting natal points are MORE POTENT (karmic/repetitive) than direct ones. All planets are checked for hits, not just slow planets.)\n\n")
-        prompt_parts.append(f"12. BNN MODULE (Bhrigu Nandi Nadi - Geometry-Based Analysis):\n{calc['bnn_display_str']}\n(Note: BNN uses Directional Grouping and Orbital Order instead of House-based analysis. Retrograde planets project into previous sign. Friend/Enemy relationships follow Deva/Asura groups, not Parashari Tatkalik Maitri.)\n\n")
-    
-    # Timeline section (11)
-    if st.session_state.show_timeline:
-        prompt_parts.append(f"11. VIMSHOTTARI DASHA TIMELINE (Full 80-Year Projection):\n{timeline_content}\n\n")
-    
-    # Footer (always shown)
-    prompt_parts.append(f"Lagna Summary: {calc['lagna']}\nMoon Nakshatra: {calc['nak']}\n\nName: {calc['name_display']}\nGender: {calc['gender_display']}\nDate: {calc['dob_display']}\nTime: {calc['tob_display']}\nPlace: {calc['place_display']}\nTimezone: {calc['timezone_display']}\n\nINSTRUCTION:\n\"O Brahma-Daivagya, align the heavens using the Master Data Packet.\n1. Cross-reference the Transit Snapshot with the Natal Chart to find specific hits.\n2. If a hit occurs, check the SAV score of that sign.\n3. Check if the planet involves the 64th Navamsa or 22nd Drekkana.\n4. Note: Eclipse status checks the middle of the month; precise dates may vary by +/- 14 days.\n5. Synthesize the prediction.\n\"")
-    
-    complete_unified_prompt = "".join(prompt_parts)
-    
-    # MAIN OUTPUT: Filtered Unified Prompt
-    st.subheader("Copy This Prompt (Complete - Sections 1-13):")
-    if include_structured_json:
-        # For JSON mode, show only JSON (exclusive mode)
-        json_str = json.dumps(calc['structured_payload'], separators=(',', ':'), ensure_ascii=False)
-        st.code(json_str, language='json')
-    else:
-        st.code(complete_unified_prompt, language="markdown")
-    
-    st.subheader("Data Preview:")
-    st.text(calc['vargas'])
+    2. SPECIAL POINTS (Vulnerable Spots):
+    - 64th Navamsa Sign: {d64}
+    - 22nd Drekkana Sign: {d22}
+    - Upagrahas:
+    {upagrahas}
+
+    3. ASHTAKAVARGA (Bhinna + Sarva):
+    {sav}
+    Total SAV Score: {total_sav_score} points
+    (Rule: SAV >28 = Strong sign, SAV <25 = Vulnerable sign)
+
+    4. CURRENT TIMING (Software - Dasha System):
+    {dasha_info}
+    (Note: Hit Theory is the "Trigger," but Dasha is the "Gun." A hit usually doesn't manifest unless the Dasha Lord is involved.)
+
+    5. TIME VARIABLES:
+    - Birth Ghati: {ishta:.2f}
+    - Day Duration: {dinamaana:.2f}
+    - Planetary Avasthas (Moods):
+    {avasthas}
+
+    6. PANCHANG (Five Limbs of Time):
+    {panchang_info}
+    - Tithi: Crucial for relationship and emotional depth
+    - Yoga: Crucial for health and innate nature
+    - Karana: Crucial for career/work success
+
+    7. TRANSIT SNAPSHOT (Current Real-Time Positions):
+    As of: {transit_timestamp}
+    {transits}
+    (Logic: If Transit Planet hits Natal Planet within 3 deg, it is a significant event. Retrograde planets hitting natal points are MORE POTENT (karmic/repetitive) than direct ones. All planets are checked for hits, not just slow planets.)
+
+    12. BNN MODULE (Bhrigu Nandi Nadi - Geometry-Based Analysis):
+    {bnn_display_str}
+    (Note: BNN uses Directional Grouping and Orbital Order instead of House-based analysis. Retrograde planets project into previous sign. Friend/Enemy relationships follow Deva/Asura groups, not Parashari Tatkalik Maitri.)
+
+    Name: {name_display}
+    Gender: {gender_display}
+    Date: {dob_display}
+    Time: {tob_display}
+    Place: {place_display}
+    Timezone: {timezone_display}
+    """
+
+                # Section 3: Timeline (will be updated based on toggle)
+                timeline_section_base = f"""SYSTEM ROLE: 'BRAHMA-DAIVAGYA' (The Vedic Calculator & Seer)
+
+    III. VIMSHOTTARI DASHA TIMELINE SECTION
+
+    11. VIMSHOTTARI DASHA TIMELINE (Full 80-Year Projection):
+
+    """
+
+                # Original final_prompt for backward compatibility (if needed)
+                final_prompt = f"""SYSTEM ROLE: 'BRAHMA-DAIVAGYA' (The Vedic Calculator & Seer)
+
+    I. CONTEXT & DATA SOURCE
+    You are the Brahma-Daivagya. Use the provided MASTER DATA PACKET to perform "Hit Theory" analysis.
+    Do not calculate planetary degrees. Use the pre-calculated values below.
+
+    *** MASTER DATA PACKET (PRE-CALCULATED) ***
+
+    1. NATAL CHART (Hardware):
+    {natal_table}
+
+    2. SPECIAL POINTS (Vulnerable Spots):
+    - 64th Navamsa Sign: {d64}
+    - 22nd Drekkana Sign: {d22}
+    - Upagrahas:
+    {upagrahas}
+
+    3. ASHTAKAVARGA (Bhinna + Sarva):
+    {sav}
+    (Rule: SAV >28 = Strong sign, SAV <25 = Vulnerable sign)
+
+    4. CURRENT TIMING (Software - Dasha System):
+    {dasha_info}
+    (Note: Hit Theory is the "Trigger," but Dasha is the "Gun." A hit usually doesn't manifest unless the Dasha Lord is involved.)
+
+    5. TIME VARIABLES:
+    - Birth Ghati: {ishta:.2f}
+    - Day Duration: {dinamaana:.2f}
+    - Planetary Avasthas (Moods):
+    {avasthas}
+
+    6. PANCHANG (Five Limbs of Time):
+    {panchang_info}
+    - Tithi: Crucial for relationship and emotional depth
+    - Yoga: Crucial for health and innate nature
+    - Karana: Crucial for career/work success
+
+    7. TRANSIT SNAPSHOT (Current Real-Time Positions):
+    As of: {transit_timestamp}
+    {transits}
+    (Logic: If Transit Planet hits Natal Planet within 3 deg, it is a significant event. Retrograde planets hitting natal points are MORE POTENT (karmic/repetitive) than direct ones. All planets are checked for hits, not just slow planets.)
+
+    8. D1 HOUSE CHART (Rashi - Whole Sign):
+    {d1}
+
+    9. BHAVA CHALIT CHART (Sripati - House Shifts):
+    {bhava_chalit}
+    (Note: If a planet shows "[Rashi HX → Bhava HY]", it has shifted houses. This is critical for prediction.)
+
+    10. SHODASHAVARGA MATRIX (16 CHARTS):
+    {vargas}
+
+    11. VIMSHOTTARI DASHA TIMELINE (Full 80-Year Projection):
+    {timeline_full}
+
+    12. BNN MODULE (Bhrigu Nandi Nadi - Geometry-Based Analysis):
+    {bnn_display_str}
+    (Note: BNN uses Directional Grouping and Orbital Order instead of House-based analysis. Retrograde planets project into previous sign. Friend/Enemy relationships follow Deva/Asura groups, not Parashari Tatkalik Maitri.)
+
+    13. UNIFIED BNN-PARASHARI KUNDALI (The Snapshot):
+    {unified_kundali}
+    (Note: This table uses Whole Sign Houses (Rashi = House) for BNN geometry compatibility. Bhava Shift markers [→ HX] indicate planets that moved to different houses in Bhava Chalit chart. For Direction/Trines (BNN), use the Sign column. For Career/Outcome (Parashari), check Bhava Shift if present.)
+
+    Lagna Summary: {lagna}
+    Moon Nakshatra: {nak}
+
+    Name: {name_display}
+    Gender: {gender_display}
+    Date: {dob_display}
+    Time: {tob_display}
+    Place: {place_display}
+    Timezone: {timezone_display}
+
+    INSTRUCTION:
+    "O Brahma-Daivagya, align the heavens using the Master Data Packet.
+    1. Cross-reference the Transit Snapshot with the Natal Chart to find specific hits.
+    2. If a hit occurs, check the SAV score of that sign.
+    3. Check if the planet involves the 64th Navamsa or 22nd Drekkana.
+    4. Note: Eclipse status checks the middle of the month; precise dates may vary by +/- 14 days.
+    5. Synthesize the prediction.
+    """
+                # Hack to inject the variable inside f-string locally
+                final_prompt = final_prompt.replace("{natal_table}", natal_table)
+
+                # Implement Exclusive Output Switch
+                if include_structured_json:
+                    # Optional: Advanced Condensing Logic - Remove None/empty string values
+                    def remove_null_values(obj):
+                        """Recursively remove keys with None or empty string values (lossless minification)."""
+                        if isinstance(obj, dict):
+                            return {k: remove_null_values(v) for k, v in obj.items() 
+                                    if v is not None and v != ""}
+                        elif isinstance(obj, list):
+                            return [remove_null_values(item) for item in obj]
+                        return obj
+
+                    # Apply condensing (optional - can be disabled if needed)
+                    condensed_payload = remove_null_values(structured_payload)
+
+                    # Smart Compression: Lossless Minification (no indent, compact separators)
+                    json_str = json.dumps(condensed_payload, separators=(',', ':'), ensure_ascii=False)
+
+                    # Exclusive mode: Only JSON, no text prompt
+                    final_prompt = json_str
+                else:
+                    # Standard mode: Add structured JSON if requested (legacy behavior)
+                    # Note: This branch is now only for backward compatibility
+                    # The exclusive switch above handles the JSON-only mode
+                    pass
+
+                # Sidebar for full timeline reference (only show if we have calculated data)
+                if 'calc_results' in st.session_state:
+                    with st.sidebar:
+                        st.markdown("### 📅 Full Dasha Timeline Reference")
+                        if st.button("Show All Mahadasha & Antardasha", key="show_full_timeline_sidebar"):
+                            st.session_state['show_timeline_sidebar'] = True
+
+                        if st.session_state.get('show_timeline_sidebar', False):
+                            st.markdown("**Full 80-Year Timeline (All Entries)**")
+                            # Format full timeline from stored data
+                            calc_sidebar = st.session_state.calc_results
+                            full_timeline_rows = []
+                            full_timeline_rows.append("| Start (Solar) | End (Solar) | Start (Savana) | End (Savana) | MD | AD | PD |")
+                            full_timeline_rows.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
+                            for entry in calc_sidebar['full_timeline_data'][:500]:  # Limit to 500 for performance
+                                full_timeline_rows.append(f"| {entry.get('start_solar', 'N/A')} | {entry.get('end_solar', 'N/A')} | {entry.get('start_savana', 'N/A')} | {entry.get('end_savana', 'N/A')} | {entry['md']} | {entry['ad']} | {entry['pd']} |")
+                            full_timeline_table_sidebar = "\n".join(full_timeline_rows)
+                            st.markdown(full_timeline_table_sidebar)
+                            if st.button("Close Timeline", key="close_timeline"):
+                                st.session_state['show_timeline_sidebar'] = False
+
+                # Results are stored in session_state above - display logic is handled outside button block
+
+    # Display logic OUTSIDE button block - always runs, even when checkboxes are toggled
+    # This ensures data persists when toggling sections
+    if 'calc_results' in st.session_state:
+        calc = st.session_state.calc_results
+
+        # Initialize session state for section visibility and timeline toggle
+        if 'show_charts' not in st.session_state:
+            st.session_state.show_charts = True
+        if 'show_inner_calculations' not in st.session_state:
+            st.session_state.show_inner_calculations = True
+        if 'show_timeline' not in st.session_state:
+            st.session_state.show_timeline = True
+        if 'show_full_timeline' not in st.session_state:
+            st.session_state.show_full_timeline = False
+
+        # Section filter checkboxes - placed right after Generate Prompt button area
+        st.write("---")
+        st.caption("🔍 Filter sections to show/hide in the complete prompt below:")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.session_state.show_charts = st.checkbox("📊 Show Charts (Sections 1, 8, 9, 10, 13)", value=st.session_state.show_charts, key="cb_charts")
+        with col2:
+            st.session_state.show_inner_calculations = st.checkbox("🔬 Show Inner Calculations (Sections 2, 3, 4, 5, 6, 7, 12)", value=st.session_state.show_inner_calculations, key="cb_inner")
+        with col3:
+            st.session_state.show_timeline = st.checkbox("📅 Show Timeline (Section 11)", value=st.session_state.show_timeline, key="cb_timeline")
+
+        # Timeline toggle (only shown if timeline section is selected)
+        if st.session_state.show_timeline:
+            st.session_state.show_full_timeline = st.checkbox("Show Full 80-Year Timeline", value=st.session_state.show_full_timeline, key="cb_full_timeline")
+
+
+        # Rebuild total SAV score from the Total row in the BAV/SAV table
+        _total_line = [ln for ln in calc['sav'].split('\n') if 'Total' in ln]
+        total_sav_score = sum(int(n) for n in re.findall(r'\d+', _total_line[0])) if _total_line else 0
+
+        # Extract BNN Kundali only
+        bnn_lines = calc['bnn_display_str'].split('\n')
+        bnn_kundali_lines = []
+        in_kundali_section = False
+        for line in bnn_lines:
+            if "DIRECTIONAL GROUPS" in line:
+                in_kundali_section = True
+                bnn_kundali_lines.append(line)
+            elif "ORBITAL ORDER" in line:
+                in_kundali_section = True
+                bnn_kundali_lines.append(line)
+            elif in_kundali_section:
+                if line.startswith("###") and "RETROGRADE" in line:
+                    break
+                bnn_kundali_lines.append(line)
+        bnn_kundali_only = "\n".join(bnn_kundali_lines) if bnn_kundali_lines else "No BNN Kundali data available"
+
+        # Format full timeline
+        full_timeline_rows = []
+        full_timeline_rows.append("| Start (Solar) | End (Solar) | Start (Savana) | End (Savana) | MD | AD | PD | Duration (Days) |")
+        full_timeline_rows.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
+        for entry in calc['full_timeline_data']:
+            full_timeline_rows.append(f"| {entry.get('start_solar', 'N/A')} | {entry.get('end_solar', 'N/A')} | {entry.get('start_savana', 'N/A')} | {entry.get('end_savana', 'N/A')} | {entry['md']} | {entry['ad']} | {entry['pd']} | {entry.get('duration_solar_days', 0):.1f} |")
+        full_timeline_table = "\n".join(full_timeline_rows)
+
+        # Build sections
+        charts_section = f"""SYSTEM ROLE: 'BRAHMA-DAIVAGYA' (The Vedic Calculator & Seer)
+
+    I. CHARTS SECTION
+
+    1. NATAL CHART (Hardware):
+    {calc['natal_table']}
+
+    8. D1 HOUSE CHART (Rashi - Whole Sign):
+    {calc['d1']}
+
+    9. BHAVA CHALIT CHART (Sripati - House Shifts):
+    {calc['bhava_chalit']}
+    (Note: If a planet shows "[Rashi HX → Bhava HY]", it has shifted houses. This is critical for prediction.)
+
+    10. SHODASHAVARGA MATRIX (16 CHARTS):
+    {calc['vargas']}
+
+    13. UNIFIED BNN-PARASHARI KUNDALI (The Snapshot):
+    {calc['unified_kundali']}
+    (Note: This table uses Whole Sign Houses (Rashi = House) for BNN geometry compatibility. Bhava Shift markers [→ HX] indicate planets that moved to different houses in Bhava Chalit chart. For Direction/Trines (BNN), use the Sign column. For Career/Outcome (Parashari), check Bhava Shift if present.)
+
+    14. BNN KUNDALI ONLY:
+    {bnn_kundali_only}
+
+    Lagna Summary: {calc['lagna']}
+    Moon Nakshatra: {calc['nak']}
+
+    Name: {calc['name_display']}
+    Gender: {calc['gender_display']}
+    Date: {calc['dob_display']}
+    Time: {calc['tob_display']}
+    Place: {calc['place_display']}
+    Timezone: {calc['timezone_display']}
+    """
+
+        inner_calculations_section = f"""SYSTEM ROLE: 'BRAHMA-DAIVAGYA' (The Vedic Calculator & Seer)
+
+    II. INNER CALCULATIONS SECTION
+
+    2. SPECIAL POINTS (Vulnerable Spots):
+    - 64th Navamsa Sign: {calc['d64']}
+    - 22nd Drekkana Sign: {calc['d22']}
+    - Upagrahas:
+    {calc['upagrahas']}
+
+    3. ASHTAKAVARGA (Bhinna + Sarva):
+    {calc['sav']}
+    Total SAV Score: {total_sav_score} points
+    (Rule: SAV >28 = Strong sign, SAV <25 = Vulnerable sign)
+
+    4. CURRENT TIMING (Software - Dasha System):
+    {calc['dasha_info']}
+    (Note: Hit Theory is the "Trigger," but Dasha is the "Gun." A hit usually doesn't manifest unless the Dasha Lord is involved.)
+
+    5. TIME VARIABLES:
+    - Birth Ghati: {calc['ishta']:.2f}
+    - Day Duration: {calc['dinamaana']:.2f}
+    - Planetary Avasthas (Moods):
+    {calc['avasthas']}
+
+    6. PANCHANG (Five Limbs of Time):
+    {calc['panchang_info']}
+    - Tithi: Crucial for relationship and emotional depth
+    - Yoga: Crucial for health and innate nature
+    - Karana: Crucial for career/work success
+
+    7. TRANSIT SNAPSHOT (Current Real-Time Positions):
+    As of: {calc['transit_timestamp']}
+    {calc['transits']}
+    (Logic: If Transit Planet hits Natal Planet within 3 deg, it is a significant event. Retrograde planets hitting natal points are MORE POTENT (karmic/repetitive) than direct ones. All planets are checked for hits, not just slow planets.)
+
+    12. BNN MODULE (Bhrigu Nandi Nadi - Geometry-Based Analysis):
+    {calc['bnn_display_str']}
+    (Note: BNN uses Directional Grouping and Orbital Order instead of House-based analysis. Retrograde planets project into previous sign. Friend/Enemy relationships follow Deva/Asura groups, not Parashari Tatkalik Maitri.)
+
+    Name: {calc['name_display']}
+    Gender: {calc['gender_display']}
+    Date: {calc['dob_display']}
+    Time: {calc['tob_display']}
+    Place: {calc['place_display']}
+    Timezone: {calc['timezone_display']}
+    """
+
+        timeline_section_base = f"""SYSTEM ROLE: 'BRAHMA-DAIVAGYA' (The Vedic Calculator & Seer)
+
+    III. VIMSHOTTARI DASHA TIMELINE SECTION
+
+    11. VIMSHOTTARI DASHA TIMELINE (Full 80-Year Projection):
+
+    """
+
+        # Build complete unified prompt dynamically based on checkbox filters
+        # Update timeline section based on toggle
+        if st.session_state.show_full_timeline:
+            timeline_content = full_timeline_table
+        else:
+            timeline_content = calc['timeline_full']
+
+        # Build sections conditionally
+        prompt_parts = []
+        prompt_parts.append("SYSTEM ROLE: 'BRAHMA-DAIVAGYA' (The Vedic Calculator & Seer)\n\nI. CONTEXT & DATA SOURCE\nYou are the Brahma-Daivagya. Use the provided MASTER DATA PACKET to perform \"Hit Theory\" analysis.\nDo not calculate planetary degrees. Use the pre-calculated values below.\n\n*** MASTER DATA PACKET (PRE-CALCULATED) ***\n\n")
+
+        # Charts sections (1, 8, 9, 10, 13)
+        if st.session_state.show_charts:
+            prompt_parts.append(f"1. NATAL CHART (Hardware):\n{calc['natal_table']}\n\n")
+            prompt_parts.append(f"8. D1 HOUSE CHART (Rashi - Whole Sign):\n{calc['d1']}\n\n")
+            prompt_parts.append(f"9. BHAVA CHALIT CHART (Sripati - House Shifts):\n{calc['bhava_chalit']}\n(Note: If a planet shows \"[Rashi HX → Bhava HY]\", it has shifted houses. This is critical for prediction.)\n\n")
+            prompt_parts.append(f"10. SHODASHAVARGA MATRIX (16 CHARTS):\n{calc['vargas']}\n\n")
+            prompt_parts.append(f"13. UNIFIED BNN-PARASHARI KUNDALI (The Snapshot):\n{calc['unified_kundali']}\n(Note: This table uses Whole Sign Houses (Rashi = House) for BNN geometry compatibility. Bhava Shift markers [→ HX] indicate planets that moved to different houses in Bhava Chalit chart. For Direction/Trines (BNN), use the Sign column. For Career/Outcome (Parashari), check Bhava Shift if present.)\n\n")
+
+        # Inner calculations sections (2, 3, 4, 5, 6, 7, 12)
+        if st.session_state.show_inner_calculations:
+            prompt_parts.append(f"2. SPECIAL POINTS (Vulnerable Spots):\n- 64th Navamsa Sign: {calc['d64']}\n- 22nd Drekkana Sign: {calc['d22']}\n- Upagrahas:\n{calc['upagrahas']}\n\n")
+            prompt_parts.append(f"3. ASHTAKAVARGA (Bhinna + Sarva):\n{calc['sav']}\nTotal SAV Score: {total_sav_score} points\n(Rule: SAV >28 = Strong sign, SAV <25 = Vulnerable sign)\n\n")
+            prompt_parts.append(f"4. CURRENT TIMING (Software - Dasha System):\n{calc['dasha_info']}\n(Note: Hit Theory is the \"Trigger,\" but Dasha is the \"Gun.\" A hit usually doesn't manifest unless the Dasha Lord is involved.)\n\n")
+            prompt_parts.append(f"5. TIME VARIABLES:\n- Birth Ghati: {calc['ishta']:.2f}\n- Day Duration: {calc['dinamaana']:.2f}\n- Planetary Avasthas (Moods):\n{calc['avasthas']}\n\n")
+            prompt_parts.append(f"6. PANCHANG (Five Limbs of Time):\n{calc['panchang_info']}\n- Tithi: Crucial for relationship and emotional depth\n- Yoga: Crucial for health and innate nature\n- Karana: Crucial for career/work success\n\n")
+            prompt_parts.append(f"7. TRANSIT SNAPSHOT (Current Real-Time Positions):\nAs of: {calc['transit_timestamp']}\n{calc['transits']}\n(Logic: If Transit Planet hits Natal Planet within 3 deg, it is a significant event. Retrograde planets hitting natal points are MORE POTENT (karmic/repetitive) than direct ones. All planets are checked for hits, not just slow planets.)\n\n")
+            prompt_parts.append(f"12. BNN MODULE (Bhrigu Nandi Nadi - Geometry-Based Analysis):\n{calc['bnn_display_str']}\n(Note: BNN uses Directional Grouping and Orbital Order instead of House-based analysis. Retrograde planets project into previous sign. Friend/Enemy relationships follow Deva/Asura groups, not Parashari Tatkalik Maitri.)\n\n")
+
+        # Timeline section (11)
+        if st.session_state.show_timeline:
+            prompt_parts.append(f"11. VIMSHOTTARI DASHA TIMELINE (Full 80-Year Projection):\n{timeline_content}\n\n")
+
+        # Footer (always shown)
+        prompt_parts.append(f"Lagna Summary: {calc['lagna']}\nMoon Nakshatra: {calc['nak']}\n\nName: {calc['name_display']}\nGender: {calc['gender_display']}\nDate: {calc['dob_display']}\nTime: {calc['tob_display']}\nPlace: {calc['place_display']}\nTimezone: {calc['timezone_display']}\n\nINSTRUCTION:\n\"O Brahma-Daivagya, align the heavens using the Master Data Packet.\n1. Cross-reference the Transit Snapshot with the Natal Chart to find specific hits.\n2. If a hit occurs, check the SAV score of that sign.\n3. Check if the planet involves the 64th Navamsa or 22nd Drekkana.\n4. Note: Eclipse status checks the middle of the month; precise dates may vary by +/- 14 days.\n5. Synthesize the prediction.\n\"")
+
+        complete_unified_prompt = "".join(prompt_parts)
+
+        # MAIN OUTPUT: Filtered Unified Prompt
+        st.subheader("Copy This Prompt (Complete - Sections 1-13):")
+        if include_structured_json:
+            # For JSON mode, show only JSON (exclusive mode)
+            json_str = json.dumps(calc['structured_payload'], separators=(',', ':'), ensure_ascii=False)
+            st.code(json_str, language='json')
+        else:
+            st.code(complete_unified_prompt, language="markdown")
+
+        st.subheader("Data Preview:")
+        st.text(calc['vargas'])

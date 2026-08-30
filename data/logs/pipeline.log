@@ -1,0 +1,449 @@
+
+======== PIPELINE START [chart] id=d0cf02dd ========
+[trace:d0cf02dd] [chart] .. pipeline.start (-)
+[trace:d0cf02dd] [chart] .. validate_and_key (-) | name=TraceTest
+[trace:d0cf02dd] [chart] OK chart_key (-) | key=2efb292c043d, force=False
+[trace:d0cf02dd] [chart] OK validate_and_key (1ms) | name=TraceTest
+[trace:d0cf02dd] [chart] .. disk_cache_lookup (-) | key=2efb292c043d
+[trace:d0cf02dd] [chart] OK cache_hit (-) | key=2efb292c043d
+[trace:d0cf02dd] [chart] OK disk_cache_lookup (7ms) | key=2efb292c043d
+[trace:d0cf02dd] [chart] OK pipeline.end (12ms)
+======== PIPELINE END   [chart] id=d0cf02dd total=12ms ========
+
+
+======== PIPELINE START [ask] id=ce769b32 ========
+[trace:ce769b32] [ask] .. pipeline.start (-)
+[trace:ce769b32] [ask] .. load_cached_chart (-) | chart_key=f8eadca59968
+[trace:ce769b32] [ask] OK chart_meta (-) | name=Harsh Verma, lagna=Virgo (6) at 14°2' | Hasta (Pada 2), keys=26
+[trace:ce769b32] [ask] OK load_cached_chart (8ms) | chart_key=f8eadca59968
+[trace:ce769b32] [ask] .. budget_gate (-)
+[trace:ce769b32] [ask] OK budget_gate (1ms)
+[trace:ce769b32] [ask] .. load_system_prompt (-)
+[trace:ce769b32] [ask] OK prompt_ready (-) | system_chars=24085, system_preview=# BRAHMA-DAIVAGYA V4 — SOURCE-LOCKED VEDIC ASTROLOGY ANALYSIS ENGINE  You are BR
+[trace:ce769b32] [ask] OK load_system_prompt (1ms)
+[trace:ce769b32] [ask] .. condense_packet_build_user_msg (-) | q_len=43
+[trace:ce769b32] [ask] OK user_message_ready (-) | user_chars=48679, history_turns=1, max_tokens=1500
+[trace:ce769b32] [ask] OK condense_packet_build_user_msg (2ms) | q_len=43
+[trace:ce769b32] [ask] .. nvidia_chat_completion (-) | model=muse-glimmer
+[trace:ce769b32] [ask] FAIL nvidia_chat_completion (0ms) | model=muse-glimmer, error=RuntimeError, msg=NVIDIA_API_KEY is not set. Create a key at build.nvidia.com and set it in the environment.
+[trace:ce769b32] [ask] FAIL pipeline.error (16ms) | error=RuntimeError, msg=NVIDIA_API_KEY is not set. Create a key at build.nvidia.com and set it in the environment.
+======== PIPELINE FAIL  [ask] id=ce769b32 error=RuntimeError: NVIDIA_API_KEY is not set. Create a key at build.nvidia.com and set it in the environment. ========
+
+
+======== PIPELINE START [ask] id=c5a17bc6 ========
+[trace:c5a17bc6] [ask] .. pipeline.start (-)
+[trace:c5a17bc6] [ask] .. load_cached_chart (-) | chart_key=f8eadca59968
+[trace:c5a17bc6] [ask] OK chart_meta (-) | name=Harsh Verma, lagna=Virgo (6) at 14°2' | Hasta (Pada 2), keys=26
+[trace:c5a17bc6] [ask] OK load_cached_chart (8ms) | chart_key=f8eadca59968
+[trace:c5a17bc6] [ask] .. budget_gate (-)
+[trace:c5a17bc6] [ask] OK budget_gate (1ms)
+[trace:c5a17bc6] [ask] .. load_system_prompt (-)
+[trace:c5a17bc6] [ask] OK prompt_ready (-) | system_chars=24085, system_preview=# BRAHMA-DAIVAGYA V4 — SOURCE-LOCKED VEDIC ASTROLOGY ANALYSIS ENGINE  You are BR
+[trace:c5a17bc6] [ask] OK load_system_prompt (1ms)
+[trace:c5a17bc6] [ask] .. condense_packet_build_user_msg (-) | q_len=43
+[trace:c5a17bc6] [ask] OK user_message_ready (-) | user_chars=48856, history_turns=3, max_tokens=1500
+[trace:c5a17bc6] [ask] OK condense_packet_build_user_msg (2ms) | q_len=43
+[trace:c5a17bc6] [ask] .. nvidia_chat_completion (-) | model=muse-glimmer
+[trace:c5a17bc6] [ask] FAIL nvidia_chat_completion (0ms) | model=muse-glimmer, error=RuntimeError, msg=NVIDIA_API_KEY is not set. Create a key at build.nvidia.com and set it in the environment.
+[trace:c5a17bc6] [ask] FAIL pipeline.error (17ms) | error=RuntimeError, msg=NVIDIA_API_KEY is not set. Create a key at build.nvidia.com and set it in the environment.
+======== PIPELINE FAIL  [ask] id=c5a17bc6 error=RuntimeError: NVIDIA_API_KEY is not set. Create a key at build.nvidia.com and set it in the environment. ========
+
+
+======== PIPELINE START [ask] id=d16b59f3 ========
+[trace:d16b59f3] [ask] .. pipeline.start (-)
+[trace:d16b59f3] [ask] .. load_cached_chart (-) | chart_key=f8eadca59968
+[trace:d16b59f3] [ask] OK chart_meta (-) | name=Harsh Verma, lagna=Virgo (6) at 14°2' | Hasta (Pada 2), keys=26
+[trace:d16b59f3] [ask] OK load_cached_chart (6ms) | chart_key=f8eadca59968
+[trace:d16b59f3] [ask] .. budget_gate (-)
+[trace:d16b59f3] [ask] OK budget_gate (1ms)
+[trace:d16b59f3] [ask] .. load_system_prompt (-)
+[trace:d16b59f3] [ask] OK prompt_ready (-) | system_chars=24085, system_preview=# BRAHMA-DAIVAGYA V4 — SOURCE-LOCKED VEDIC ASTROLOGY ANALYSIS ENGINE  You are BR
+[trace:d16b59f3] [ask] OK load_system_prompt (1ms)
+[trace:d16b59f3] [ask] .. condense_packet_build_user_msg (-) | q_len=43
+[trace:d16b59f3] [ask] OK user_message_ready (-) | user_chars=49033, history_turns=5, max_tokens=1500
+[trace:d16b59f3] [ask] OK condense_packet_build_user_msg (2ms) | q_len=43
+[trace:d16b59f3] [ask] .. nvidia_chat_completion (-) | model=muse-glimmer
+[trace:d16b59f3] [ask] FAIL nvidia_chat_completion (0ms) | model=muse-glimmer, error=RuntimeError, msg=NVIDIA_API_KEY is not set. Create a key at build.nvidia.com and set it in the environment.
+[trace:d16b59f3] [ask] FAIL pipeline.error (15ms) | error=RuntimeError, msg=NVIDIA_API_KEY is not set. Create a key at build.nvidia.com and set it in the environment.
+======== PIPELINE FAIL  [ask] id=d16b59f3 error=RuntimeError: NVIDIA_API_KEY is not set. Create a key at build.nvidia.com and set it in the environment. ========
+
+
+======== PIPELINE START [chart] id=cddbe248 ========
+[trace:cddbe248] [chart] .. pipeline.start (-)
+[trace:cddbe248] [chart] .. validate_and_key (-) | name=Harsh Verma
+[trace:cddbe248] [chart] OK chart_key (-) | key=a972c6d83968, force=False
+[trace:cddbe248] [chart] OK validate_and_key (1ms) | name=Harsh Verma
+[trace:cddbe248] [chart] .. disk_cache_lookup (-) | key=a972c6d83968
+[trace:cddbe248] [chart] OK disk_cache_lookup (0ms) | key=a972c6d83968
+[trace:cddbe248] [chart] .. import_engine (-)
+[trace:cddbe248] [chart] OK import_engine (0ms)
+[trace:cddbe248] [chart] .. calculate_vedic_charts (-) | key=a972c6d83968
+[trace:cddbe248] [chart] OK engine_result (-) | lagna=Virgo (6) at 14°7' | Hasta (Pada 2), moon_nak=Rohini, payload_keys=26
+[trace:cddbe248] [chart] OK calculate_vedic_charts (137ms) | key=a972c6d83968
+[trace:cddbe248] [chart] .. serialize_and_cache_write (-)
+[trace:cddbe248] [chart] OK serialize_and_cache_write (9ms)
+[trace:cddbe248] [chart] OK pipeline.end (150ms)
+======== PIPELINE END   [chart] id=cddbe248 total=150ms ========
+
+
+======== PIPELINE START [ask] id=dc4f26d3 ========
+[trace:dc4f26d3] [ask] .. pipeline.start (-)
+[trace:dc4f26d3] [ask] .. load_cached_chart (-) | chart_key=a972c6d83968
+[trace:dc4f26d3] [ask] OK chart_meta (-) | name=Harsh Verma, lagna=Virgo (6) at 14°7' | Hasta (Pada 2), keys=26
+[trace:dc4f26d3] [ask] OK load_cached_chart (10ms) | chart_key=a972c6d83968
+[trace:dc4f26d3] [ask] .. budget_gate (-)
+[trace:dc4f26d3] [ask] OK budget_gate (1ms)
+[trace:dc4f26d3] [ask] .. load_system_prompt (-)
+[trace:dc4f26d3] [ask] OK prompt_ready (-) | system_chars=24085, system_preview=# BRAHMA-DAIVAGYA V4 — SOURCE-LOCKED VEDIC ASTROLOGY ANALYSIS ENGINE  You are BR
+[trace:dc4f26d3] [ask] OK load_system_prompt (1ms)
+[trace:dc4f26d3] [ask] .. condense_packet_build_user_msg (-) | q_len=43
+[trace:dc4f26d3] [ask] OK user_message_ready (-) | user_chars=48707, history_turns=1, max_tokens=1500
+[trace:dc4f26d3] [ask] OK condense_packet_build_user_msg (1ms) | q_len=43
+[trace:dc4f26d3] [ask] .. nvidia_chat_completion (-) | model=muse-glimmer
+[trace:dc4f26d3] [ask] FAIL nvidia_chat_completion (0ms) | model=muse-glimmer, error=RuntimeError, msg=NVIDIA_API_KEY is not set. Create a key at build.nvidia.com and set it in the environment.
+[trace:dc4f26d3] [ask] FAIL pipeline.error (17ms) | error=RuntimeError, msg=NVIDIA_API_KEY is not set. Create a key at build.nvidia.com and set it in the environment.
+======== PIPELINE FAIL  [ask] id=dc4f26d3 error=RuntimeError: NVIDIA_API_KEY is not set. Create a key at build.nvidia.com and set it in the environment. ========
+
+
+======== PIPELINE START [ask] id=55b6e547 ========
+[trace:55b6e547] [ask] .. pipeline.start (-)
+[trace:55b6e547] [ask] .. load_cached_chart (-) | chart_key=a972c6d83968
+[trace:55b6e547] [ask] OK chart_meta (-) | name=Harsh Verma, lagna=Virgo (6) at 14°7' | Hasta (Pada 2), keys=26
+[trace:55b6e547] [ask] OK load_cached_chart (9ms) | chart_key=a972c6d83968
+[trace:55b6e547] [ask] .. budget_gate (-)
+[trace:55b6e547] [ask] OK budget_gate (0ms)
+[trace:55b6e547] [ask] .. load_system_prompt (-)
+[trace:55b6e547] [ask] OK prompt_ready (-) | system_chars=24085, system_preview=# BRAHMA-DAIVAGYA V4 — SOURCE-LOCKED VEDIC ASTROLOGY ANALYSIS ENGINE  You are BR
+[trace:55b6e547] [ask] OK load_system_prompt (1ms)
+[trace:55b6e547] [ask] .. condense_packet_build_user_msg (-) | q_len=43
+[trace:55b6e547] [ask] OK user_message_ready (-) | user_chars=48884, history_turns=3, max_tokens=1500
+[trace:55b6e547] [ask] OK condense_packet_build_user_msg (2ms) | q_len=43
+[trace:55b6e547] [ask] .. nvidia_chat_completion (-) | model=muse-glimmer
+[trace:55b6e547] [ask] OK llm_response (-) | model=meta/muse-glimmer-30b, prompt_tokens=22832, completion_tokens=1500, answer_chars=0
+[trace:55b6e547] [ask] OK nvidia_chat_completion (13614ms) | model=muse-glimmer
+[trace:55b6e547] [ask] .. record_usage (-)
+[trace:55b6e547] [ask] OK record_usage (1ms)
+[trace:55b6e547] [ask] OK pipeline.end (13632ms)
+======== PIPELINE END   [ask] id=55b6e547 total=13632ms ========
+
+
+======== PIPELINE START [ask] id=f9c36870 ========
+[trace:f9c36870] [ask] .. pipeline.start (-)
+[trace:f9c36870] [ask] .. load_cached_chart (-) | chart_key=a972c6d83968
+[trace:f9c36870] [ask] OK chart_meta (-) | name=Harsh Verma, lagna=Virgo (6) at 14°7' | Hasta (Pada 2), keys=26
+[trace:f9c36870] [ask] OK load_cached_chart (365ms) | chart_key=a972c6d83968
+[trace:f9c36870] [ask] .. budget_gate (-)
+[trace:f9c36870] [ask] OK budget_gate (394ms)
+[trace:f9c36870] [ask] .. load_system_prompt (-)
+[trace:f9c36870] [ask] OK prompt_ready (-) | system_chars=24085, system_preview=# BRAHMA-DAIVAGYA V4 — SOURCE-LOCKED VEDIC ASTROLOGY ANALYSIS ENGINE  You are BR
+[trace:f9c36870] [ask] OK load_system_prompt (263ms)
+[trace:f9c36870] [ask] .. condense_packet_build_user_msg (-) | q_len=43
+[trace:f9c36870] [ask] OK user_message_ready (-) | user_chars=49000, history_turns=5, max_tokens=1500
+[trace:f9c36870] [ask] OK condense_packet_build_user_msg (89ms) | q_len=43
+[trace:f9c36870] [ask] .. nvidia_chat_completion (-) | model=muse-glimmer
+[trace:f9c36870] [ask] OK llm_response (-) | model=meta/muse-glimmer-30b, prompt_tokens=22873, completion_tokens=1500, answer_chars=0
+[trace:f9c36870] [ask] OK nvidia_chat_completion (7064ms) | model=muse-glimmer
+[trace:f9c36870] [ask] .. record_usage (-)
+[trace:f9c36870] [ask] OK record_usage (1ms)
+[trace:f9c36870] [ask] OK pipeline.end (8659ms)
+======== PIPELINE END   [ask] id=f9c36870 total=8659ms ========
+
+
+======== PIPELINE START [ask] id=95842355 ========
+[trace:95842355] [ask] .. pipeline.start (-)
+[trace:95842355] [ask] .. load_cached_chart (-) | chart_key=2efb292c043d
+[trace:95842355] [ask] OK chart_meta (-) | name=TraceTest, lagna=Taurus (2) at 17°29' | Rohini (Pada 3), keys=26
+[trace:95842355] [ask] OK load_cached_chart (7ms) | chart_key=2efb292c043d
+[trace:95842355] [ask] .. budget_gate (-)
+[trace:95842355] [ask] OK budget_gate (8ms)
+[trace:95842355] [ask] .. load_system_prompt (-)
+[trace:95842355] [ask] OK prompt_ready (-) | system_chars=24085, system_preview=# BRAHMA-DAIVAGYA V4 — SOURCE-LOCKED VEDIC ASTROLOGY ANALYSIS ENGINE  You are BR
+[trace:95842355] [ask] OK load_system_prompt (1ms)
+[trace:95842355] [ask] .. condense_packet_build_user_msg (-) | q_len=61
+[trace:95842355] [ask] OK user_message_ready (-) | user_chars=48510, history_turns=0, max_tokens=2048
+[trace:95842355] [ask] OK condense_packet_build_user_msg (2ms) | q_len=61
+[trace:95842355] [ask] .. nvidia_chat_completion (-) | model=muse-glimmer
+[trace:95842355] [ask] OK llm_response (-) | model=meta/muse-glimmer-30b, prompt_tokens=22940, completion_tokens=612, answer_chars=386
+[trace:95842355] [ask] OK nvidia_chat_completion (5279ms) | model=muse-glimmer
+[trace:95842355] [ask] .. record_usage (-)
+[trace:95842355] [ask] OK record_usage (1ms)
+[trace:95842355] [ask] OK pipeline.end (5300ms)
+======== PIPELINE END   [ask] id=95842355 total=5300ms ========
+
+
+======== PIPELINE START [ask] id=645e459f ========
+[trace:645e459f] [ask] .. pipeline.start (-)
+[trace:645e459f] [ask] .. load_cached_chart (-) | chart_key=2efb292c043d
+[trace:645e459f] [ask] OK chart_meta (-) | name=TraceTest, lagna=Taurus (2) at 17°29' | Rohini (Pada 3), keys=26
+[trace:645e459f] [ask] OK load_cached_chart (5ms) | chart_key=2efb292c043d
+[trace:645e459f] [ask] .. budget_gate (-)
+[trace:645e459f] [ask] OK budget_gate (8ms)
+[trace:645e459f] [ask] .. load_system_prompt (-)
+[trace:645e459f] [ask] OK prompt_ready (-) | system_chars=24085, system_preview=# BRAHMA-DAIVAGYA V4 — SOURCE-LOCKED VEDIC ASTROLOGY ANALYSIS ENGINE  You are BR
+[trace:645e459f] [ask] OK load_system_prompt (1ms)
+[trace:645e459f] [ask] .. plan_packet (-) | q_len=46
+[trace:645e459f] [ask] OK packet_plan (-) | rationale=marriage/7th-house focus, key_count=9, keys=natal_core,cusps,planet_star_sub_lords,kp_astrology_matrix,kp_master_packet,kp_prediction,special_yogas,natal_drishti_table,natal_house_drishti_summary
+[trace:645e459f] [ask] OK plan_packet (1ms) | q_len=46
+[trace:645e459f] [ask] .. build_user_msg (-) | q_len=46
+[trace:645e459f] [ask] OK user_message_ready (-) | user_chars=24765, history_turns=0, max_tokens=4096
+[trace:645e459f] [ask] OK build_user_msg (1ms) | q_len=46
+[trace:645e459f] [ask] .. nvidia_synthesize (-) | model=muse-glimmer
+[trace:645e459f] [ask] OK llm_response (-) | model=meta/muse-glimmer-30b, prompt_tokens=15697, completion_tokens=2796, answer_chars=2969, finish_reason=stop, content_source=content
+[trace:645e459f] [ask] OK nvidia_synthesize (22949ms) | model=muse-glimmer
+[trace:645e459f] [ask] .. record_usage (-)
+[trace:645e459f] [ask] OK record_usage (1ms)
+[trace:645e459f] [ask] OK pipeline.end (22969ms)
+======== PIPELINE END   [ask] id=645e459f total=22969ms ========
+
+[trace:testtrac] [ask] .. llm_round_1 (-) | round=1
+[trace:testtrac] [ask] OK llm_round_result (-) | round=1, finish=tool_calls, tool_calls=1, answer_chars=0, content_source=content
+[trace:testtrac] [ask] .. tool.get_chart_slice (-) | chart_key=key_agent_loop_0001, fields=['cusps', 'kp_prediction']
+[trace:testtrac] [ask] OK tool_result (-) | name=get_chart_slice, ok=True, ms=13.4, bytes=234
+[trace:testtrac] [ask] OK tool.get_chart_slice (15ms) | chart_key=key_agent_loop_0001, fields=['cusps', 'kp_prediction']
+[trace:testtrac] [ask] OK llm_round_1 (21ms) | round=1
+[trace:testtrac] [ask] .. llm_round_2 (-) | round=2
+[trace:testtrac] [ask] OK llm_round_result (-) | round=2, finish=stop, tool_calls=0, answer_chars=37, content_source=content
+[trace:testtrac] [ask] OK llm_round_2 (3ms) | round=2
+
+======== PIPELINE START [chart] id=7e1c16ed ========
+[trace:7e1c16ed] [chart] .. pipeline.start (-)
+[trace:7e1c16ed] [chart] .. validate_and_key (-) | name=CacheTest
+[trace:7e1c16ed] [chart] OK chart_key (-) | key=b18bcdff3fc1, force=False
+[trace:7e1c16ed] [chart] OK validate_and_key (3ms) | name=CacheTest
+[trace:7e1c16ed] [chart] .. disk_cache_lookup (-) | key=b18bcdff3fc1
+[trace:7e1c16ed] [chart] OK disk_cache_lookup (1ms) | key=b18bcdff3fc1
+[trace:7e1c16ed] [chart] .. import_engine (-)
+[trace:7e1c16ed] [chart] OK import_engine (11050ms)
+[trace:7e1c16ed] [chart] .. calculate_vedic_charts (-) | key=b18bcdff3fc1
+[trace:7e1c16ed] [chart] OK engine_result (-) | lagna=Taurus (2) at 17°29' | Rohini (Pada 3), moon_nak=P. Phalguni, payload_keys=26
+[trace:7e1c16ed] [chart] OK calculate_vedic_charts (631ms) | key=b18bcdff3fc1
+[trace:7e1c16ed] [chart] .. serialize_and_cache_write (-)
+[trace:7e1c16ed] [chart] OK serialize_and_cache_write (120ms)
+[trace:7e1c16ed] [chart] OK pipeline.end (11813ms)
+======== PIPELINE END   [chart] id=7e1c16ed total=11813ms ========
+
+
+======== PIPELINE START [chart] id=3dc7abfa ========
+[trace:3dc7abfa] [chart] .. pipeline.start (-)
+[trace:3dc7abfa] [chart] .. validate_and_key (-) | name=CacheTest
+[trace:3dc7abfa] [chart] OK chart_key (-) | key=b18bcdff3fc1, force=False
+[trace:3dc7abfa] [chart] OK validate_and_key (3ms) | name=CacheTest
+[trace:3dc7abfa] [chart] .. disk_cache_lookup (-) | key=b18bcdff3fc1
+[trace:3dc7abfa] [chart] .. sqlite_ensure (-)
+[trace:3dc7abfa] [chart] OK sqlite_ensure (12ms)
+[trace:3dc7abfa] [chart] OK cache_hit (-) | key=b18bcdff3fc1
+[trace:3dc7abfa] [chart] OK disk_cache_lookup (78ms) | key=b18bcdff3fc1
+[trace:3dc7abfa] [chart] OK pipeline.end (85ms)
+======== PIPELINE END   [chart] id=3dc7abfa total=85ms ========
+
+[trace:testtrac] [ask] .. llm_round_1 (-) | round=1
+[trace:testtrac] [ask] OK llm_round_result (-) | round=1, finish=tool_calls, tool_calls=1, answer_chars=0, content_source=content
+[trace:testtrac] [ask] .. tool.get_chart_slice (-) | chart_key=key_agent_loop_0001, fields=['cusps', 'kp_prediction']
+[trace:testtrac] [ask] OK tool_result (-) | name=get_chart_slice, ok=True, ms=4.5, bytes=234
+[trace:testtrac] [ask] OK tool.get_chart_slice (5ms) | chart_key=key_agent_loop_0001, fields=['cusps', 'kp_prediction']
+[trace:testtrac] [ask] OK llm_round_1 (7ms) | round=1
+[trace:testtrac] [ask] .. llm_round_2 (-) | round=2
+[trace:testtrac] [ask] OK llm_round_result (-) | round=2, finish=stop, tool_calls=0, answer_chars=37, content_source=content
+[trace:testtrac] [ask] OK llm_round_2 (1ms) | round=2
+
+======== PIPELINE START [chart] id=3f1283cd ========
+[trace:3f1283cd] [chart] .. pipeline.start (-)
+[trace:3f1283cd] [chart] .. validate_and_key (-) | name=CacheTest
+[trace:3f1283cd] [chart] OK chart_key (-) | key=b18bcdff3fc1, force=False
+[trace:3f1283cd] [chart] OK validate_and_key (1ms) | name=CacheTest
+[trace:3f1283cd] [chart] .. disk_cache_lookup (-) | key=b18bcdff3fc1
+[trace:3f1283cd] [chart] OK disk_cache_lookup (0ms) | key=b18bcdff3fc1
+[trace:3f1283cd] [chart] .. import_engine (-)
+[trace:3f1283cd] [chart] OK import_engine (902ms)
+[trace:3f1283cd] [chart] .. calculate_vedic_charts (-) | key=b18bcdff3fc1
+[trace:3f1283cd] [chart] OK engine_result (-) | lagna=Taurus (2) at 17°29' | Rohini (Pada 3), moon_nak=P. Phalguni, payload_keys=26
+[trace:3f1283cd] [chart] OK calculate_vedic_charts (147ms) | key=b18bcdff3fc1
+[trace:3f1283cd] [chart] .. serialize_and_cache_write (-)
+[trace:3f1283cd] [chart] OK serialize_and_cache_write (40ms)
+[trace:3f1283cd] [chart] OK pipeline.end (1092ms)
+======== PIPELINE END   [chart] id=3f1283cd total=1092ms ========
+
+
+======== PIPELINE START [chart] id=51a4a3c5 ========
+[trace:51a4a3c5] [chart] .. pipeline.start (-)
+[trace:51a4a3c5] [chart] .. validate_and_key (-) | name=CacheTest
+[trace:51a4a3c5] [chart] OK chart_key (-) | key=b18bcdff3fc1, force=False
+[trace:51a4a3c5] [chart] OK validate_and_key (1ms) | name=CacheTest
+[trace:51a4a3c5] [chart] .. disk_cache_lookup (-) | key=b18bcdff3fc1
+[trace:51a4a3c5] [chart] .. sqlite_ensure (-)
+[trace:51a4a3c5] [chart] OK sqlite_ensure (3ms)
+[trace:51a4a3c5] [chart] OK cache_hit (-) | key=b18bcdff3fc1
+[trace:51a4a3c5] [chart] OK disk_cache_lookup (22ms) | key=b18bcdff3fc1
+[trace:51a4a3c5] [chart] OK pipeline.end (23ms)
+======== PIPELINE END   [chart] id=51a4a3c5 total=23ms ========
+
+[trace:testtrac] [ask] .. llm_round_1 (-) | round=1
+[trace:testtrac] [ask] OK llm_round_result (-) | round=1, finish=tool_calls, tool_calls=1, answer_chars=0, content_source=content
+[trace:testtrac] [ask] .. tool.get_chart_slice (-) | chart_key=key_agent_loop_0001, fields=['cusps', 'kp_prediction']
+[trace:testtrac] [ask] OK tool_result (-) | name=get_chart_slice, ok=True, ms=2.5, bytes=234
+[trace:testtrac] [ask] OK tool.get_chart_slice (3ms) | chart_key=key_agent_loop_0001, fields=['cusps', 'kp_prediction']
+[trace:testtrac] [ask] OK llm_round_1 (4ms) | round=1
+[trace:testtrac] [ask] .. llm_round_2 (-) | round=2
+[trace:testtrac] [ask] OK llm_round_result (-) | round=2, finish=stop, tool_calls=0, answer_chars=37, content_source=content
+[trace:testtrac] [ask] OK llm_round_2 (1ms) | round=2
+
+======== PIPELINE START [chart] id=ee347288 ========
+[trace:ee347288] [chart] .. pipeline.start (-)
+[trace:ee347288] [chart] .. validate_and_key (-) | name=CacheTest
+[trace:ee347288] [chart] OK chart_key (-) | key=b18bcdff3fc1, force=False
+[trace:ee347288] [chart] OK validate_and_key (1ms) | name=CacheTest
+[trace:ee347288] [chart] .. disk_cache_lookup (-) | key=b18bcdff3fc1
+[trace:ee347288] [chart] OK disk_cache_lookup (0ms) | key=b18bcdff3fc1
+[trace:ee347288] [chart] .. import_engine (-)
+[trace:ee347288] [chart] OK import_engine (631ms)
+[trace:ee347288] [chart] .. calculate_vedic_charts (-) | key=b18bcdff3fc1
+[trace:ee347288] [chart] OK engine_result (-) | lagna=Taurus (2) at 17°29' | Rohini (Pada 3), moon_nak=P. Phalguni, payload_keys=26
+[trace:ee347288] [chart] OK calculate_vedic_charts (111ms) | key=b18bcdff3fc1
+[trace:ee347288] [chart] .. serialize_and_cache_write (-)
+[trace:ee347288] [chart] OK serialize_and_cache_write (38ms)
+[trace:ee347288] [chart] OK pipeline.end (781ms)
+======== PIPELINE END   [chart] id=ee347288 total=781ms ========
+
+
+======== PIPELINE START [chart] id=dc8fd989 ========
+[trace:dc8fd989] [chart] .. pipeline.start (-)
+[trace:dc8fd989] [chart] .. validate_and_key (-) | name=CacheTest
+[trace:dc8fd989] [chart] OK chart_key (-) | key=b18bcdff3fc1, force=False
+[trace:dc8fd989] [chart] OK validate_and_key (1ms) | name=CacheTest
+[trace:dc8fd989] [chart] .. disk_cache_lookup (-) | key=b18bcdff3fc1
+[trace:dc8fd989] [chart] .. sqlite_ensure (-)
+[trace:dc8fd989] [chart] OK sqlite_ensure (2ms)
+[trace:dc8fd989] [chart] OK cache_hit (-) | key=b18bcdff3fc1
+[trace:dc8fd989] [chart] OK disk_cache_lookup (16ms) | key=b18bcdff3fc1
+[trace:dc8fd989] [chart] OK pipeline.end (17ms)
+======== PIPELINE END   [chart] id=dc8fd989 total=17ms ========
+
+
+======== PIPELINE START [ask] id=767079d3 ========
+[trace:767079d3] [ask] .. pipeline.start (-)
+[trace:767079d3] [ask] .. load_cached_chart (-) | chart_key=f8eadca59968
+[trace:767079d3] [ask] OK chart_meta (-) | name=Harsh Verma, lagna=Virgo (6) at 14°2' | Hasta (Pada 2), keys=26
+[trace:767079d3] [ask] OK load_cached_chart (9ms) | chart_key=f8eadca59968
+[trace:767079d3] [ask] .. budget_gate (-)
+[trace:767079d3] [ask] OK budget_gate (12ms)
+[trace:767079d3] [ask] .. load_system_prompt (-)
+[trace:767079d3] [ask] OK prompt_ready (-) | system_chars=24085, system_preview=# BRAHMA-DAIVAGYA V4 — SOURCE-LOCKED VEDIC ASTROLOGY ANALYSIS ENGINE  You are BR
+[trace:767079d3] [ask] OK load_system_prompt (14ms)
+[trace:767079d3] [ask] .. plan_packet (-) | q_len=43
+[trace:767079d3] [ask] OK packet_plan (-) | rationale=general synthesis (no topic match), key_count=11, keys=natal_core,cusps,planet_star_sub_lords,kp_astrology_matrix,kp_master_packet,kp_prediction,unified_kundali,panchang,special_yogas,natal_drishti_table,current_transit_aspect_impacts
+[trace:767079d3] [ask] OK plan_packet (3ms) | q_len=43
+[trace:767079d3] [ask] .. build_user_msg (-) | q_len=43
+[trace:767079d3] [ask] OK user_message_ready (-) | user_chars=24907, history_turns=6, max_tokens=4096
+[trace:767079d3] [ask] OK build_user_msg (2ms) | q_len=43
+[trace:767079d3] [ask] .. nvidia_synthesize (-) | model=muse-glimmer
+[trace:767079d3] [ask] OK llm_response (-) | model=meta/muse-glimmer-30b, prompt_tokens=15723, completion_tokens=2708, answer_chars=3369, finish_reason=stop, content_source=content
+[trace:767079d3] [ask] OK nvidia_synthesize (19052ms) | model=muse-glimmer
+[trace:767079d3] [ask] .. record_usage (-)
+[trace:767079d3] [ask] OK record_usage (2ms)
+[trace:767079d3] [ask] OK pipeline.end (19101ms)
+======== PIPELINE END   [ask] id=767079d3 total=19101ms ========
+
+[trace:testtrac] [ask] .. llm_round_1 (-) | round=1
+[trace:testtrac] [ask] OK llm_round_result (-) | round=1, finish=tool_calls, tool_calls=1, answer_chars=0, content_source=content
+[trace:testtrac] [ask] .. tool.get_chart_slice (-) | chart_key=key_agent_loop_0001, fields=['cusps', 'kp_prediction']
+[trace:testtrac] [ask] OK tool_result (-) | name=get_chart_slice, ok=True, ms=2.7, bytes=234
+[trace:testtrac] [ask] OK tool.get_chart_slice (3ms) | chart_key=key_agent_loop_0001, fields=['cusps', 'kp_prediction']
+[trace:testtrac] [ask] OK llm_round_1 (5ms) | round=1
+[trace:testtrac] [ask] .. llm_round_2 (-) | round=2
+[trace:testtrac] [ask] OK llm_round_result (-) | round=2, finish=stop, tool_calls=0, answer_chars=37, content_source=content
+[trace:testtrac] [ask] OK llm_round_2 (2ms) | round=2
+[trace:testtrac] [ask] .. llm_round_1 (-) | round=1
+[trace:testtrac] [ask] OK llm_round_result (-) | round=1, model=mock-model, finish=tool_calls, tool_calls=1, answer_chars=0, content_source=content
+[trace:testtrac] [ask] .. tool.get_chart_slice (-) | chart_key=key_agent_loop_0001, fields=['cusps', 'kp_prediction']
+[trace:testtrac] [ask] OK tool_result (-) | name=get_chart_slice, ok=True, ms=2.4, bytes=234
+[trace:testtrac] [ask] OK tool.get_chart_slice (3ms) | chart_key=key_agent_loop_0001, fields=['cusps', 'kp_prediction']
+[trace:testtrac] [ask] OK llm_round_1 (4ms) | round=1
+[trace:testtrac] [ask] .. llm_round_2 (-) | round=2
+[trace:testtrac] [ask] OK llm_round_result (-) | round=2, model=mock-model, finish=stop, tool_calls=0, answer_chars=37, content_source=content
+[trace:testtrac] [ask] OK llm_round_2 (1ms) | round=2
+
+======== PIPELINE START [ask] id=68c5b890 ========
+[trace:68c5b890] [ask] .. pipeline.start (-)
+[trace:68c5b890] [ask] .. load_cached_chart (-) | chart_key=f8eadca59968
+[trace:68c5b890] [ask] OK chart_meta (-) | name=Harsh Verma, lagna=Virgo (6) at 14°2' | Hasta (Pada 2), keys=26
+[trace:68c5b890] [ask] OK load_cached_chart (51ms) | chart_key=f8eadca59968
+[trace:68c5b890] [ask] .. budget_gate (-)
+[trace:68c5b890] [ask] OK budget_gate (10ms)
+[trace:68c5b890] [ask] .. load_system_prompt (-) | profile=planet_taste
+[trace:68c5b890] [ask] OK prompt_ready (-) | profile=planet_taste, model=meta/muse-glimmer-30b, system_chars=2702, system_preview=# PLANET TASTE — KP placement & delivery prompt (A/B testing)  You are a **KP pl
+[trace:68c5b890] [ask] OK load_system_prompt (1ms) | profile=planet_taste
+[trace:68c5b890] [ask] .. tool_agent (-)
+[trace:68c5b890] [ask] .. llm_round_1 (-) | round=1
+[trace:68c5b890] [ask] OK llm_round_result (-) | round=1, model=meta/muse-glimmer-30b, finish=tool_calls, tool_calls=1, answer_chars=410, content_source=reasoning_content
+[trace:68c5b890] [ask] .. tool.list_chart_fields (-) | chart_key=f8eadca59968ee74390b754fef7a5e58d3ef1494
+[trace:68c5b890] [ask] OK tool_result (-) | name=list_chart_fields, ok=True, ms=4.7, bytes=2594
+[trace:68c5b890] [ask] OK tool.list_chart_fields (7ms) | chart_key=f8eadca59968ee74390b754fef7a5e58d3ef1494
+[trace:68c5b890] [ask] OK llm_round_1 (2124ms) | round=1
+[trace:68c5b890] [ask] .. llm_round_2 (-) | round=2
+[trace:68c5b890] [ask] OK llm_round_result (-) | round=2, model=meta/muse-glimmer-30b, finish=tool_calls, tool_calls=1, answer_chars=139, content_source=reasoning_content
+[trace:68c5b890] [ask] .. tool.get_chart_meta (-) | chart_key=f8eadca59968ee74390b754fef7a5e58d3ef1494
+[trace:68c5b890] [ask] OK tool_result (-) | name=get_chart_meta, ok=True, ms=1.5, bytes=284
+[trace:68c5b890] [ask] OK tool.get_chart_meta (2ms) | chart_key=f8eadca59968ee74390b754fef7a5e58d3ef1494
+[trace:68c5b890] [ask] OK llm_round_2 (737ms) | round=2
+[trace:68c5b890] [ask] .. llm_round_3 (-) | round=3
+[trace:68c5b890] [ask] OK llm_round_result (-) | round=3, model=meta/muse-glimmer-30b, finish=tool_calls, tool_calls=1, answer_chars=0, content_source=content
+[trace:68c5b890] [ask] .. tool.get_chart_slice (-) | chart_key=f8eadca59968ee74390b754fef7a5e58d3ef1494, fields=['cusps', 'planet_star_sub_lords', 'kp_p
+[trace:68c5b890] [ask] OK tool_result (-) | name=get_chart_slice, ok=True, ms=2.3, bytes=16785
+[trace:68c5b890] [ask] OK tool.get_chart_slice (3ms) | chart_key=f8eadca59968ee74390b754fef7a5e58d3ef1494, fields=['cusps', 'planet_star_sub_lords', 'kp_p
+[trace:68c5b890] [ask] OK llm_round_3 (600ms) | round=3
+[trace:68c5b890] [ask] .. llm_round_4 (-) | round=4
+[trace:68c5b890] [ask] OK llm_round_result (-) | round=4, model=meta/muse-glimmer-30b, finish=tool_calls, tool_calls=1, answer_chars=630, content_source=reasoning_content
+[trace:68c5b890] [ask] .. tool.get_chart_slice (-) | chart_key=f8eadca59968ee74390b754fef7a5e58d3ef1494, fields=['kp_astrology_matrix']
+[trace:68c5b890] [ask] OK tool_result (-) | name=get_chart_slice, ok=True, ms=2.2, bytes=16508
+[trace:68c5b890] [ask] OK tool.get_chart_slice (3ms) | chart_key=f8eadca59968ee74390b754fef7a5e58d3ef1494, fields=['kp_astrology_matrix']
+[trace:68c5b890] [ask] OK llm_round_4 (2332ms) | round=4
+[trace:68c5b890] [ask] .. llm_final_no_tools (-)
+[trace:68c5b890] [ask] OK llm_final_no_tools (13601ms)
+[trace:68c5b890] [ask] OK tool_agent (19400ms)
+[trace:68c5b890] [ask] .. record_usage (-)
+[trace:68c5b890] [ask] OK record_usage (2ms)
+[trace:68c5b890] [ask] OK pipeline.end (19470ms)
+======== PIPELINE END   [ask] id=68c5b890 total=19470ms ========
+
+
+======== PIPELINE START [ask] id=7edf12f0 ========
+[trace:7edf12f0] [ask] .. pipeline.start (-)
+[trace:7edf12f0] [ask] .. load_cached_chart (-) | chart_key=f8eadca59968
+[trace:7edf12f0] [ask] OK chart_meta (-) | name=Harsh Verma, lagna=Virgo (6) at 14°2' | Hasta (Pada 2), keys=26
+[trace:7edf12f0] [ask] OK load_cached_chart (10ms) | chart_key=f8eadca59968
+[trace:7edf12f0] [ask] .. budget_gate (-)
+[trace:7edf12f0] [ask] OK budget_gate (9ms)
+[trace:7edf12f0] [ask] .. load_system_prompt (-) | profile=default
+[trace:7edf12f0] [ask] OK prompt_ready (-) | profile=default, model=minimaxai/minimax-m3, system_chars=25835, system_preview=# BRAHMA-DAIVAGYA V4 — SOURCE-LOCKED VEDIC ASTROLOGY ANALYSIS ENGINE  You are BR
+[trace:7edf12f0] [ask] OK load_system_prompt (1ms) | profile=default
+[trace:7edf12f0] [ask] .. tool_agent (-)
+[trace:7edf12f0] [ask] .. llm_round_1 (-) | round=1
+[trace:7edf12f0] [ask] OK llm_round_result (-) | round=1, model=minimaxai/minimax-m3, finish=tool_calls, tool_calls=2, answer_chars=67, content_source=content
+[trace:7edf12f0] [ask] .. tool.get_chart_meta (-) | chart_key=f8eadca59968ee74390b754fef7a5e58d3ef1494
+[trace:7edf12f0] [ask] OK tool_result (-) | name=get_chart_meta, ok=True, ms=1.4, bytes=284
+[trace:7edf12f0] [ask] OK tool.get_chart_meta (2ms) | chart_key=f8eadca59968ee74390b754fef7a5e58d3ef1494
+[trace:7edf12f0] [ask] .. tool.list_chart_fields (-) | chart_key=f8eadca59968ee74390b754fef7a5e58d3ef1494
+[trace:7edf12f0] [ask] OK tool_result (-) | name=list_chart_fields, ok=True, ms=1.6, bytes=2594
+[trace:7edf12f0] [ask] OK tool.list_chart_fields (2ms) | chart_key=f8eadca59968ee74390b754fef7a5e58d3ef1494
+[trace:7edf12f0] [ask] OK llm_round_1 (16745ms) | round=1
+[trace:7edf12f0] [ask] .. llm_round_2 (-) | round=2
+[trace:7edf12f0] [ask] OK llm_round_result (-) | round=2, model=minimaxai/minimax-m3, finish=tool_calls, tool_calls=1, answer_chars=0, content_source=content
+[trace:7edf12f0] [ask] .. tool.get_chart_slice (-) | chart_key=f8eadca59968ee74390b754fef7a5e58d3ef1494, fields=['cusps', 'planet_star_sub_lords', 'kp_p
+[trace:7edf12f0] [ask] OK tool_result (-) | name=get_chart_slice, ok=True, ms=2.5, bytes=22880
+[trace:7edf12f0] [ask] OK tool.get_chart_slice (3ms) | chart_key=f8eadca59968ee74390b754fef7a5e58d3ef1494, fields=['cusps', 'planet_star_sub_lords', 'kp_p
+[trace:7edf12f0] [ask] OK llm_round_2 (10279ms) | round=2
+[trace:7edf12f0] [ask] .. llm_round_3 (-) | round=3
+[trace:7edf12f0] [ask] FAIL llm_round_3 (1636ms) | round=3, error=RateLimitError, msg=Error code: 429 - {'status': 429, 'title': 'Too Many Requests'}
+[trace:7edf12f0] [ask] FAIL tool_agent (28662ms) | error=RateLimitError, msg=Error code: 429 - {'status': 429, 'title': 'Too Many Requests'}
+[trace:7edf12f0] [ask] FAIL pipeline.error (28685ms) | error=RateLimitError, msg=Error code: 429 - {'status': 429, 'title': 'Too Many Requests'}
+======== PIPELINE FAIL  [ask] id=7edf12f0 error=RateLimitError: Error code: 429 - {'status': 429, 'title': 'Too Many Requests'} ========
+
+[trace:testtrac] [ask] .. llm_round_1 (-) | round=1
+[trace:testtrac] [ask] OK llm_round_result (-) | round=1, model=mock-model, finish=tool_calls, tool_calls=1, answer_chars=0, content_source=content
+[trace:testtrac] [ask] .. tool.get_chart_slice (-) | chart_key=key_agent_loop_0001, fields=['cusps', 'kp_prediction']
+[trace:testtrac] [ask] OK tool_result (-) | name=get_chart_slice, ok=True, ms=3.9, bytes=234
+[trace:testtrac] [ask] OK tool.get_chart_slice (4ms) | chart_key=key_agent_loop_0001, fields=['cusps', 'kp_prediction']
+[trace:testtrac] [ask] OK llm_round_1 (6ms) | round=1
+[trace:testtrac] [ask] .. llm_round_2 (-) | round=2
+[trace:testtrac] [ask] OK llm_round_result (-) | round=2, model=mock-model, finish=stop, tool_calls=0, answer_chars=37, content_source=content
+[trace:testtrac] [ask] OK llm_round_2 (1ms) | round=2
