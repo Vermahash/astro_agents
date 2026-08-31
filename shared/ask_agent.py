@@ -35,6 +35,10 @@ TOOLS_PARAM_NAMES: dict[str, list[str]] = {
     "get_cusp": ["chart_key", "house"],
     "get_planet": ["chart_key", "planet"],
     "search_places": ["q", "limit"],
+    "get_harness_plan": ["question"],
+    "search_books": ["q", "k"],
+    "search_classical_law": ["q", "limit"],
+    "run_chart_query": ["chart_key", "op", "house", "planet", "division", "houses"],
 }
 
 TOOL_PREAMBLE = """
@@ -47,6 +51,8 @@ Workflow:
 2. For event questions also get_cusp(house) for the principal house (e.g. 7 for marriage, 10 for career).
 3. After tools return, write the SESSION OVERRIDE answer skeleton (Verdict / KP Evidence / Timing / Risks / Confidence).
 4. Every bullet in KP Evidence must quote a value that appeared in a tool result.
+5. Optional: get_harness_plan(question) to see domain routing; run_chart_query for SAV/varga/lord;
+   search_books for doctrine; search_classical_law for yoga/house-law meaning (not numbers).
 
 Do not answer with general astrology. If a needed field is missing after tools, Verdict = INSUFFICIENT DATA.
 """

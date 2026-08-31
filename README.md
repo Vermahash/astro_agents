@@ -61,9 +61,9 @@ The same lines are also written to `data/logs/pipeline.log`. Live-tail:
 Get-Content E:\astro_agents\data\logs\pipeline.log -Wait -Tail 40
 ```
 
-Ask uses a **tool agent**: Muse Glimmer (or MiniMax M3) calls chart tools against SQLite. If tools fail, it falls back to the keyword packet planner.
+Ask uses a **PRE-AUDIT harness** for finance/health (and other life domains): Python specialists + one Brain LLM call. `planet_taste` still uses the placement A/B prompt. Muse can also call chart/RAG/calc MCP tools.
 
-**A/B testing (web composer):** pick **Model** (`DeepSeek V4 Flash` / `Muse Glimmer` / MiniMax) and **Prompt** (`Planet taste` vs default). MiniMax often 429s on NIM trial — prefer DeepSeek for comparison.
+**A/B testing (web composer):** pick **Model** and **Prompt** (`PRE-AUDIT Brain` / `Planet taste` / default). MiniMax often 429s on NIM trial — prefer DeepSeek for comparison.
 
 ## MCP server (same tools)
 
@@ -72,7 +72,16 @@ cd E:\astro_agents
 python -m mcp_server.chart_mcp
 ```
 
-Point Cursor MCP config at that stdio command to inspect chart fields from the IDE.
+Tools include chart slices plus `get_harness_plan`, `search_books` (HNSW RAG), `search_classical_law`, and `run_chart_query` (SAV/varga/lord lookups on the packet).
+
+## RAG index
+
+```powershell
+# After API is running:
+curl -X POST http://127.0.0.1:8080/v1/rag/index
+```
+
+Corpus: `B:\n8n\astro` (knowledge + kp-calculator docs) and `docs/prompts`. Index: `data/rag/`.
 
 ## Run web app (M2 shell)
 

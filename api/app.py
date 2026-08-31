@@ -24,7 +24,15 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
-from api.schemas import AskRequest, AskResponse, ChartCreateRequest, ChartResponse, PlaceHit, UsageResponse
+from api.schemas import (
+    AskRequest,
+    AskResponse,
+    ChartCreateRequest,
+    ChartResponse,
+    HarnessAuditRequest,
+    PlaceHit,
+    UsageResponse,
+)
 from shared.ask_service import ask_chart
 from shared.chart_service import compute_or_get_chart, get_cached_chart
 from shared.config import (
@@ -153,6 +161,72 @@ def models() -> dict[str, Any]:
     return {"default": default_model(), "models": list_models()}
 
 
+@app.get("/v1/harness/plan")
+def harness_plan(q: str) -> dict[str, Any]:
+    """Preview domain routing for a question (no LLM)."""
+    from shared.domain_harness import build_harness_plan
+
+    if not (q or "").strip():
+        raise HTTPException(status_code=422, detail="q is required")
+    return build_harness_plan(q)
+
+
+@app.post("/v1/rag/index")
+def rag_index() -> dict[str, Any]:
+    """Rebuild HNSW/RAG index from B:\\n8n\\astro + docs/prompts."""
+    from shared.rag_hnsw import build_index
+
+    try:
+        return build_index()
+    except Exception as exc:
+        logger.exception("rag index failed")
+        raise HTTPException(status_code=500, detail=f"rag index failed: {exc}") from exc
+
+
+@app.get("/v1/rag/search")
+def rag_search(q: str, k: int = 5) -> dict[str, Any]:
+    """Search indexed classical texts (doctrine only)."""
+    from shared.rag_hnsw import search_books
+
+    if len((q or "").strip()) < 3:
+        raise HTTPException(status_code=422, detail="q must be at least 3 characters")
+    return search_books(q, k=min(max(k, 1), 12))
+
+
+@app.post("/v1/harness/audit")
+def harness_audit(body: HarnessAuditRequest) -> dict[str, Any]:
+    """
+    PRE-AUDIT Python path only: domain plan, compact facts, specialist checkpoints.
+    No LLM. Use this to inspect finance/health evidence when NIM is down.
+    """
+    from shared.chart_service import get_cached_chart
+    from shared.harness_pipeline import collect_harness_evidence
+
+    doc = get_cached_chart(body.chart_key)
+    if doc is None:
+        raise HTTPException(status_code=404, detail="chart not found")
+    ev = collect_harness_evidence(body.question, doc, use_rag=body.use_rag)
+    plan = ev["plan"]
+    facts = ev["facts"]
+    return {
+        "chart_key": body.chart_key,
+        "question": body.question,
+        "mode": "harness_audit",
+        "inventory_title": plan.get("inventory_title"),
+        "inventory_box": ev["inventory_box"],
+        "domains": plan.get("domains"),
+        "tally": ev["tally"],
+        "checkpoints": [
+            {"id": r.get("id"), "specialist": r.get("specialist"), "label": r.get("label"), "status": r.get("status"), "cite": r.get("cite")}
+            for r in ev["audit_rows"]
+        ],
+        "lagna": facts.get("lagna"),
+        "sav": facts.get("sav"),
+        "exchanges": facts.get("exchanges"),
+        "rag_hits": [{"source": h.get("source"), "score": h.get("score"), "topic": h.get("topic")} for h in ev["rag_hits"]],
+    }
+
+
 @app.post("/v1/ask", response_model=AskResponse)
 def ask(body: AskRequest) -> dict[str, Any]:
     """Interpretive Q&A using Gem/KP or planet_taste prompt + NVIDIA NIM model."""
@@ -164,6 +238,7 @@ def ask(body: AskRequest) -> dict[str, Any]:
             max_tokens=body.max_tokens,
             model=body.model,
             prompt_profile=body.prompt_profile,
+            use_web_law=body.use_web_law,
         )
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc

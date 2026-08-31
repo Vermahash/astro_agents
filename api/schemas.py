@@ -62,7 +62,10 @@ class PlaceHit(BaseModel):
     lon: float
 
 
-class AskRequest(BaseModel):
+class HarnessAuditRequest(BaseModel):
+    chart_key: str
+    question: str = Field(..., min_length=1)
+    use_rag: bool = False
     chart_key: str
     question: str = Field(..., min_length=1)
     history: list[dict[str, str]] = Field(default_factory=list)
@@ -72,8 +75,12 @@ class AskRequest(BaseModel):
         description="NIM model id or alias: muse | minimax | meta/muse-glimmer-30b | minimaxai/minimax-m3",
     )
     prompt_profile: str = Field(
-        default="default",
-        description="default (Gem+KP strict) or planet_taste (placement/delivery A/B prompt)",
+        default="pre_audit",
+        description="pre_audit (PRE-AUDIT Brain), default (Gem+KP), or planet_taste",
+    )
+    use_web_law: bool = Field(
+        default=False,
+        description="If true, Brain may fetch Wikipedia snippets for named yogas/laws (doctrine only)",
     )
 
 
@@ -90,3 +97,7 @@ class AskResponse(BaseModel):
     tools_used: list[dict[str, Any]] = Field(default_factory=list)
     mode: str | None = None
     prompt_profile: str | None = None
+    harness_plan: dict[str, Any] | None = None
+    specialist_audit: list[dict[str, Any]] | None = None
+    rag_hits: list[dict[str, Any]] | None = None
+    critic: dict[str, Any] | None = None

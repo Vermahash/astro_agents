@@ -116,6 +116,27 @@ def test_get_cusp_and_planet(store_dir):
     assert planet["result"]["data"]["star"] == "Moon"
 
 
+def test_harness_plan_and_chart_query_tools(store_dir):
+    plan = run_tool("get_harness_plan", {"question": "Tell me about his finances"})
+    assert plan["ok"] is True
+    assert plan["result"]["domains"] == ["finance"]
+    assert "ashtakavarga_sav" in plan["result"]["keys"]
+    doc = _sample_doc("key_query_test_0001")
+    doc["structured_payload"]["ashtakavarga_sav"] = {"11": 40, "2": 25}
+    doc["structured_payload"]["natal_core"] = {
+        "longitudes": {"Mercury": 182.53},
+        "sign_index": {"Mercury": 6},
+        "house_from_lagna": {"Mercury": 2},
+        "bhava_house": {"Mercury": 2},
+        "ascendant_lon": 160.0,
+    }
+    chart_store.upsert_chart_document(doc)
+    q = run_tool("run_chart_query", {"chart_key": doc["chart_key"], "op": "sav", "house": 11})
+    assert q["ok"] is True
+    assert q["result"]["ok"] is True
+    assert q["result"]["result"]["sav"] == 40
+
+
 def test_mcp_catalog_parity():
     from mcp_server.chart_mcp import mcp_exposed_tool_names, registry_tool_names
 

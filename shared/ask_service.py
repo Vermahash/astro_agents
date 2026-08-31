@@ -21,6 +21,8 @@ from typing import Any
 from shared.ask_agent import run_tool_agent
 from shared.chart_service import get_cached_chart
 from shared.chart_store import ensure_chart_in_store
+from shared.domain_harness import classify_domains
+from shared.harness_pipeline import run_harness
 from shared.llm_nvidia import chat_completion
 from shared.packet_planner import plan_packet_keys
 from shared.models_catalog import model_supports_tools, resolve_model_id
@@ -31,6 +33,19 @@ from shared.usage import assert_budget_allows, record_usage
 logger = logging.getLogger(__name__)
 
 MAX_PACKET_CHARS = 24_000
+HARNESS_PROFILES = frozenset({"pre_audit"})
+HARNESS_DOMAINS = frozenset({"finance", "health", "marriage", "career", "children", "education", "foreign"})
+
+
+def _should_use_harness(prompt_profile: str, question: str) -> bool:
+    """PRE-AUDIT Brain path for pre_audit profile and domain questions on default."""
+    name = (prompt_profile or "default").strip().lower()
+    if name == "planet_taste":
+        return False
+    if name in HARNESS_PROFILES:
+        return True
+    domains = classify_domains(question)
+    return any(d in HARNESS_DOMAINS for d in domains)
 
 
 def _condense_payload(structured: dict[str, Any], keys: list[str]) -> dict[str, Any]:
@@ -186,6 +201,7 @@ def ask_chart(
     max_tokens: int = 4096,
     model: str | None = None,
     prompt_profile: str = "default",
+    use_web_law: bool = False,
 ) -> dict[str, Any]:
     if not question or not question.strip():
         raise ValueError("question is required")
@@ -211,6 +227,23 @@ def ask_chart(
 
         with step(tr, "budget_gate"):
             assert_budget_allows(0.08)
+
+        if _should_use_harness(prompt_profile, question):
+            tr.mark(
+                "harness_route",
+                detail={"profile": prompt_profile, "domains": ",".join(classify_domains(question))},
+            )
+            return run_harness(
+                chart_key=chart_key,
+                question=question,
+                doc=doc,
+                tr=tr,
+                model=model_id,
+                max_tokens=max_tokens,
+                prompt_profile="pre_audit" if prompt_profile != "planet_taste" else "pre_audit",
+                use_rag=True,
+                use_web_law=use_web_law,
+            )
 
         with step(tr, "load_system_prompt", profile=prompt_profile):
             system = load_system_prompt(prompt_profile)

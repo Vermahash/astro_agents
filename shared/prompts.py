@@ -24,8 +24,9 @@ ACTIVE_GEM = PROMPTS_DIR / "ACTIVE_GEM.md"
 DEFAULT_KP = PROMPTS_DIR / "Gemini_instructionsKP.md"
 KP_CORE = PROMPTS_DIR / "pmp" / "01_KP_CORE_PROTOCOL.md"
 PLANET_TASTE = PROMPTS_DIR / "PLANET_TASTE.md"
+PRE_AUDIT = PROMPTS_DIR / "PRE_AUDIT_DIRECTIVE.md"
 
-PROMPT_PROFILES = ("default", "planet_taste")
+PROMPT_PROFILES = ("default", "planet_taste", "pre_audit")
 
 
 def load_system_prompt(profile: str = "default") -> str:
@@ -35,10 +36,24 @@ def load_system_prompt(profile: str = "default") -> str:
     Profiles:
         default — ACTIVE_GEM (or KP docs) + ANSWER_CONTRACT
         planet_taste — focused planet placement / delivery taste prompt
+        pre_audit — PRE-AUDIT inventory → evidence audit → verdict (Brain)
     """
     name = (profile or "default").strip().lower()
     if name not in PROMPT_PROFILES:
         raise ValueError(f"prompt_profile must be one of: {', '.join(PROMPT_PROFILES)}")
+
+    if name == "pre_audit":
+        directive = ""
+        if PRE_AUDIT.exists():
+            directive = PRE_AUDIT.read_text(encoding="utf-8").strip() + "\n\n"
+        return (
+            directive
+            + "You are the Brain synthesizer. Math comes only from the harness JSON "
+            "(python_facts + specialist_audit). Never invent longitudes, SAV, or dasha dates. "
+            "RAG and web snippets are classical doctrine only. Write the finance-style "
+            "inventory box, parameter blocks, evidence audit table, verdict, timing, "
+            "karma alignment, and system limits.\n"
+        )
 
     if name == "planet_taste":
         if PLANET_TASTE.exists():

@@ -23,6 +23,8 @@ ENGINE_DIR = ROOT / "engine"
 DATA_DIR = ROOT / "data"
 CACHE_DIR = DATA_DIR / "cache" / "charts"
 SQLITE_DIR = DATA_DIR / "sqlite"
+RAG_DIR = DATA_DIR / "rag"
+N8N_ASTRO_ROOT = Path(os.getenv("ASTRO_N8N_ROOT", r"B:\n8n\astro"))
 
 # Load E:\astro_agents\.env into process env (does not override already-set vars)
 load_dotenv(ROOT / ".env")
@@ -45,3 +47,4 @@ def ensure_data_dirs() -> None:
     """Create on-disk data folders if missing."""
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     SQLITE_DIR.mkdir(parents=True, exist_ok=True)
+    RAG_DIR.mkdir(parents=True, exist_ok=True)

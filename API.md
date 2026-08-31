@@ -27,7 +27,7 @@ Ensure `engine/global_cities_full.csv` exists if you use city search (chart comp
 python -m mcp_server.chart_mcp
 ```
 
-Tools: `list_chart_fields`, `get_chart_meta`, `get_chart_slice`, `get_cusp`, `get_planet`, `search_places`.
+Tools: `list_chart_fields`, `get_chart_meta`, `get_chart_slice`, `get_cusp`, `get_planet`, `search_places`, `get_harness_plan`, `search_books`, `search_classical_law`, `run_chart_query`.
 
 ## Endpoints
 
@@ -88,7 +88,7 @@ Interpretive Q&A with NVIDIA NIM:
 - **model** (optional): `meta/muse-glimmer-30b` | `deepseek-ai/deepseek-v4-flash-0731` | `minimaxai/minimax-m3`  
   Aliases: `muse` / `deepseek` / `minimax`  
   **Note:** MiniMax on NIM trial often returns **HTTP 429** after multi-round tool calls. DeepSeek/MiniMax run **single-shot** synthesize (tools off) to reduce rate limits.
-- **prompt_profile**: `default` (Gem + KP strict) or `planet_taste` (`docs/prompts/PLANET_TASTE.md`)
+- **prompt_profile**: `pre_audit` (default in web — PRE-AUDIT Brain), `default` (Gem + KP strict), or `planet_taste`
 
 **Request**
 
@@ -99,7 +99,8 @@ Interpretive Q&A with NVIDIA NIM:
   "history": [],
   "max_tokens": 4096,
   "model": "deepseek-ai/deepseek-v4-flash-0731",
-  "prompt_profile": "planet_taste"
+  "prompt_profile": "pre_audit",
+  "use_web_law": false
 }
 ```
 
@@ -127,14 +128,36 @@ Interpretive Q&A with NVIDIA NIM:
   "completion_tokens": 400,
   "estimated_cost_usd": 0.002,
   "trace_id": "abcdef...",
-  "mode": "tools",
-  "tools_used": [{ "name": "get_chart_slice", "ms": 2.1, "bytes": 1200, "ok": true }],
+  "mode": "harness",
+  "tools_used": [],
   "pipeline_trace": { "trace_id": "abcdef...", "kind": "ask", "total_ms": 3200.5, "steps": [] },
-  "packet_plan": null
+  "packet_plan": { "keys": ["natal_core", "ashtakavarga_sav"], "rationale": "harness domains=['finance']" },
+  "harness_plan": { "domain": "finance", "keys": [], "specialists": ["bphs", "varga_sav"] },
+  "specialist_audit": [{ "id": "sav_h11", "status": "SUPPORTS", "cite": "H11 SAV=40" }],
+  "rag_hits": [],
+  "critic": { "ok": true, "issues": [] }
 }
 ```
 
-`mode` is `tools` or `fallback_planner`. Requires `NVIDIA_API_KEY`. Enforces `ASTRO_MONTHLY_BUDGET_USD` (default 5).
+`mode` is `harness` (PRE-AUDIT Brain), `tools`, or `fallback_planner`. Requires `NVIDIA_API_KEY`. Enforces `ASTRO_MONTHLY_BUDGET_USD` (default 5).
+
+### `GET /v1/harness/plan?q=`
+
+Preview domain routing (no LLM). Example: `q=Tell me about his finances`.
+
+### `POST /v1/rag/index`
+
+Rebuild HNSW index from `ASTRO_N8N_ROOT` (default `B:\n8n\astro`) plus `docs/prompts`.
+
+### `POST /v1/harness/audit`
+
+Python-only PRE-AUDIT (no LLM): domain plan, SAV, specialist checkpoint table.
+
+```json
+{ "chart_key": "sha256...", "question": "Tell me about his finances", "use_rag": false }
+```
+
+Doctrine search over the local RAG index. Does not return chart numbers.
 
 ### `GET /v1/places?q=&limit=20`
 

@@ -37,7 +37,7 @@ export default function App() {
   const [ask, setAsk] = useState("");
   const [showChart, setShowChart] = useState(true);
   const [llmModel, setLlmModel] = useState("deepseek-ai/deepseek-v4-flash-0731");
-  const [promptProfile, setPromptProfile] = useState<"default" | "planet_taste">("planet_taste");
+  const [promptProfile, setPromptProfile] = useState<"default" | "planet_taste" | "pre_audit">("pre_audit");
 
   const [name, setName] = useState("");
   const [dobLocal, setDobLocal] = useState(defaultDatetimeLocal);
@@ -355,8 +355,9 @@ export default function App() {
                 Prompt
                 <select
                   value={promptProfile}
-                  onChange={(e) => setPromptProfile(e.target.value as "default" | "planet_taste")}
+                  onChange={(e) => setPromptProfile(e.target.value as "default" | "planet_taste" | "pre_audit")}
                 >
+                  <option value="pre_audit">PRE-AUDIT Brain (finance/health harness)</option>
                   <option value="planet_taste">Planet taste (placement A/B)</option>
                   <option value="default">Default Gem + KP strict</option>
                 </select>

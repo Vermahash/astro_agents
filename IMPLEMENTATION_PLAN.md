@@ -75,13 +75,14 @@ flowchart TB
 
 | Stage | Module | Status |
 |-------|--------|--------|
-| Domain router | `shared/domain_harness.py` | Starter done |
+| Domain router | `shared/domain_harness.py` | **Done** |
 | PRE-AUDIT | `docs/prompts/PRE_AUDIT_DIRECTIVE.md` | Done |
-| Slice fetch | `chart_tools` / SQLite | Partial |
-| Specialists + Brain | LangGraph or sequential nodes | Todo |
-| RAG | `search_books` tool | Todo |
-| Critic | packet number verifier | Todo |
-| Output formatter | inventory box + audit tables | Todo |
+| Slice fetch | `chart_tools` / SQLite + compact_facts | **Done** |
+| Specialists + Brain | `shared/specialists.py` + `shared/harness_pipeline.py` | **Done** |
+| RAG | `shared/rag_hnsw.py` HNSW + `search_books` | **Done** |
+| Critic | `shared/critic.py` | **Done** |
+| Output formatter | inventory box in Brain user packet + directive | **Done** |
+| MCP calc + law search | `run_chart_query`, `search_classical_law` | **Done** |
 
 Finance domain example: `classify_domain("finances")` → fetch `ashtakavarga_sav`, `bnn_module`, `unified_kundali`, yogas, KP cusps 2 & 11, Nadi `[2,6,10,11]` vs `[6,8,12]`.
 
@@ -122,7 +123,7 @@ Env: copy `.env.example` → `.env` (`NVIDIA_API_KEY`, optional `NVIDIA_MODEL`).
 | **M2.5** | SQLite field store + chart tools + MCP + tool agent + planner fallback + pipeline traces | **Done** |
 | **M2.6** | Model A/B UI + planet_taste prompt + rate-limit handling | **Done** |
 | **M3** | Telegram personal bot on same API | **Todo** |
-| **M4** | **Harness ecosystem:** domain router, PRE-AUDIT Brain, specialists, RAG, critic, formatted output | **In progress** (router + directive started) |
+| **M4** | **Harness ecosystem:** domain router, PRE-AUDIT Brain, specialists, RAG, critic, formatted output | **Done** |
 | **M5** | Deploy packaging (api/web); Streamlit stays on B: | **Todo** |
 
 ---
@@ -134,7 +135,8 @@ Env: copy `.env.example` → `.env` (`NVIDIA_API_KEY`, optional `NVIDIA_MODEL`).
 - `GET /health`, `GET /` → docs  
 - `POST /v1/charts`, `GET /v1/charts/{key}`  
 - `GET /v1/places`, `GET /v1/usage`, `GET /v1/models`  
-- `POST /v1/ask` — `model`, `prompt_profile`, returns `tools_used`, `pipeline_trace`, `mode`
+- `GET /v1/harness/plan`, `POST /v1/rag/index`, `GET /v1/rag/search`  
+- `POST /v1/ask` — `model`, `prompt_profile`, `use_web_law`; returns `harness_plan`, `specialist_audit`, `critic`
 
 ### Shared — `shared/`
 
@@ -144,7 +146,13 @@ Env: copy `.env.example` → `.env` (`NVIDIA_API_KEY`, optional `NVIDIA_MODEL`).
 | `chart_store.py` | SQLite field rows (`data/sqlite/charts.db`) |
 | `chart_tools.py` | Tool registry: list/meta/slice/cusp/planet/places |
 | `ask_agent.py` | Tool-calling loop (Muse) |
-| `ask_service.py` | Orchestrates tools → fallback planner |
+| `ask_service.py` | Harness (default for domains) → tools → planner |
+| `harness_pipeline.py` | PRE-AUDIT Brain orchestration |
+| `specialists.py` | BPHS / Varga-SAV / Dasha-Nadi / KP / BNN extractors |
+| `rag_hnsw.py` | Hashed embeddings + HNSW/brute RAG |
+| `chart_query.py` | Allowlisted packet calc tool |
+| `critic.py` | Degree/SAV citation check |
+| `domain_harness.py` | Domain join + checkpoint inventory |
 | `packet_planner.py` | Keyword slice selection for fallback |
 | `llm_nvidia.py` | NIM client + tools + rate-limit errors |
 | `models_catalog.py` | Allowlisted models + `supports_tools` |
@@ -193,26 +201,9 @@ Chart cache, packet planner, tools/store/agent mock, models/prompts.
 
 ### M4 — Harness ecosystem (Brain + specialists + RAG + critic)
 
-**Goal:** Answers like your finance example — inventory box, parameter blocks, evidence audit table, verdict — with **only** Python packet slices (+ optional book RAG).
+**Status: Done.** Python specialists + one Brain LLM; RAG HNSW; critic; MCP calc + law search.
 
-**Build order**
-
-1. **Wire domain harness into ask** — `classify_domain()` → fetch only `DOMAIN_PAYLOAD_KEYS[domain]` (replace keyword-only `packet_planner` over time)  
-2. **Brain prompt** — load `PRE_AUDIT_DIRECTIVE.md` + domain inventory title + slice JSON  
-3. **Specialist nodes** (sequential first, parallel later if budget allows):  
-   - BPHS: `natal_core`, `unified_kundali`, `special_yogas`  
-   - Varga/SAV: `unified_kundali`, `ashtakavarga_sav`, `ashtakavarga_bav`  
-   - Dasha/Nadi: dasha fields in `unified_kundali` / timeline + `kp_astrology_matrix` nadi tables  
-   - KP: `cusps`, `planet_star_sub_lords`, `kp_prediction`  
-   - BNN: `bnn_module`  
-   Each specialist returns structured `{checkpoints: [{name, status, cite}]}` — no prose yet.  
-4. **Brain synthesizer** — merges specialist JSON + runs Step 3 verdict; formats sections 1–10 from directive  
-5. **RAG** — local HNSW over `engine/docs/books` + prompts; tool `search_books`; never inject numbers  
-6. **Critic** — regex/JSON check: every degree/house cited must exist in packet; fail → INSUFFICIENT DATA  
-7. **LangGraph** (optional orchestration) — same nodes, visible in `pipeline.log`  
-8. Tests: finance question → plan keys include `ashtakavarga_sav`; critic rejects invented longitude  
-
-**Anti-patterns:** full packet every turn; LLM recalculating SAV; multi-agent fan-out on trivial questions.
+Anti-patterns still apply: no full packet dump; LLM must not recalculate SAV; no specialist LLM fan-out on the $5 budget.
 
 ---
 
@@ -247,12 +238,12 @@ Chart cache, packet planner, tools/store/agent mock, models/prompts.
 
 1. Load chart JSON + ensure SQLite rows  
 2. Budget gate  
-3. Load prompt (`default` or `planet_taste`)  
-4. If `model_supports_tools` (Muse): tool agent loop  
-5. Else (DeepSeek / MiniMax): packet planner + one synthesize  
+3. If domain/pre_audit: harness (router → compact facts → specialists → RAG → Brain → critic)  
+4. Else if Muse tools: tool agent loop  
+5. Else: packet planner + one synthesize  
 6. Record usage; emit pipeline log  
 
-**Tools:** `list_chart_fields`, `get_chart_meta`, `get_chart_slice`, `get_cusp`, `get_planet`, `search_places`
+**Tools:** chart slices + `get_harness_plan`, `search_books`, `search_classical_law`, `run_chart_query`
 
 ---
 
@@ -300,8 +291,8 @@ E:\astro_agents\
 - [x] Web ask grounded in packet/tools  
 - [x] Selective tools + MCP + traces  
 - [x] Model/prompt A/B for quality testing  
+- [x] RAG + critic + PRE-AUDIT harness (finance/health)  
 - [ ] Telegram allowlisted bot  
-- [ ] RAG + critic  
 - [ ] Deploy story  
 - [ ] Golden number tests vs Streamlit samples  
 
@@ -309,6 +300,6 @@ E:\astro_agents\
 
 ## 11. Immediate next action
 
-**Implement M3 (Telegram)** unless quality work is higher priority (golden tests / critic lite).
+**Immediate next:** M3 Telegram, or golden Streamlit parity tests. Harness (M4) is wired.
 
 When starting a milestone, update the status table in **§4** of this file when that milestone ships.

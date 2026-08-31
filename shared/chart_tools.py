@@ -27,7 +27,11 @@ from shared.chart_store import (
     get_meta,
     list_fields,
 )
+from shared.chart_query import run_chart_query
+from shared.domain_harness import build_harness_plan
 from shared.places import search_places
+from shared.rag_hnsw import search_books
+from shared.web_law import search_classical_law
 
 logger = logging.getLogger(__name__)
 
@@ -179,6 +183,52 @@ def tool_search_places(q: str, limit: int = 10) -> dict[str, Any]:
     return {"query": q, "results": hits, "count": len(hits)}
 
 
+def tool_get_harness_plan(question: str) -> dict[str, Any]:
+    """Classify life domains and list payload keys / specialists for a question."""
+    plan = build_harness_plan(question)
+    return {
+        "question": question,
+        "domains": plan["domains"],
+        "inventory_title": plan["inventory_title"],
+        "keys": plan["keys"],
+        "specialists": plan["specialists"],
+        "nadi_combos": plan["nadi_combos"],
+        "kp_cusps": plan["kp_cusps"],
+        "houses": plan["houses"],
+        "planets": plan["planets"],
+    }
+
+
+def tool_search_books(q: str, k: int = 5) -> dict[str, Any]:
+    """HNSW/RAG doctrine search over B:\\n8n\\astro + repo prompts. Not chart math."""
+    return search_books(q, k=min(max(k, 1), 12))
+
+
+def tool_search_classical_law(q: str, limit: int = 3) -> dict[str, Any]:
+    """Wikipedia doctrine lookup for a named yoga/house law. Not chart math."""
+    return search_classical_law(q, limit=min(max(limit, 1), 5))
+
+
+def tool_run_chart_query(
+    chart_key: str,
+    op: str,
+    house: int | None = None,
+    planet: str | None = None,
+    division: int | None = None,
+    houses: list[int] | None = None,
+) -> dict[str, Any]:
+    """Allowlisted Python lookups on the precomputed packet (SAV, varga, cusp, …)."""
+    _require_chart(chart_key)
+    return run_chart_query(
+        op=op,
+        chart_key=chart_key,
+        house=house,
+        planet=planet,
+        division=division,
+        houses=houses,
+    )
+
+
 TOOLS: list[ToolSpec] = [
     ToolSpec(
         name="list_chart_fields",
@@ -266,6 +316,88 @@ TOOLS: list[ToolSpec] = [
             "required": ["q"],
         },
         handler=tool_search_places,
+    ),
+    ToolSpec(
+        name="get_harness_plan",
+        description=(
+            "Classify the question into life domains (finance, health, marriage, …) "
+            "and return which payload keys, houses, planets, and specialists the harness will use."
+        ),
+        parameters={
+            "type": "object",
+            "properties": {
+                "question": {"type": "string"},
+            },
+            "required": ["question"],
+        },
+        handler=tool_get_harness_plan,
+    ),
+    ToolSpec(
+        name="search_books",
+        description=(
+            "Search indexed classical texts (HNSW RAG over B:\\n8n\\astro and repo prompts). "
+            "Doctrine only — never use this for longitudes or SAV scores."
+        ),
+        parameters={
+            "type": "object",
+            "properties": {
+                "q": {"type": "string"},
+                "k": {"type": "integer", "default": 5},
+            },
+            "required": ["q"],
+        },
+        handler=tool_search_books,
+    ),
+    ToolSpec(
+        name="search_classical_law",
+        description=(
+            "Look up the meaning of a named yoga, house formula, or KP/BPHS law on Wikipedia. "
+            "Doctrine only — do not treat results as this native's chart math."
+        ),
+        parameters={
+            "type": "object",
+            "properties": {
+                "q": {"type": "string"},
+                "limit": {"type": "integer", "default": 3},
+            },
+            "required": ["q"],
+        },
+        handler=tool_search_classical_law,
+    ),
+    ToolSpec(
+        name="run_chart_query",
+        description=(
+            "Python calculation/lookup on the precomputed chart. op is one of: "
+            "sav, planet, cusp, house, lord, varga, yogas, nadi, dasha, compact. "
+            "Use house (1–12), planet name, optional division (9/10/30), optional houses list for nadi."
+        ),
+        parameters={
+            "type": "object",
+            "properties": {
+                "chart_key": {"type": "string"},
+                "op": {
+                    "type": "string",
+                    "enum": [
+                        "sav",
+                        "planet",
+                        "cusp",
+                        "house",
+                        "lord",
+                        "varga",
+                        "yogas",
+                        "nadi",
+                        "dasha",
+                        "compact",
+                    ],
+                },
+                "house": {"type": "integer", "minimum": 1, "maximum": 12},
+                "planet": {"type": "string"},
+                "division": {"type": "integer"},
+                "houses": {"type": "array", "items": {"type": "integer"}},
+            },
+            "required": ["chart_key", "op"],
+        },
+        handler=tool_run_chart_query,
     ),
 ]
 

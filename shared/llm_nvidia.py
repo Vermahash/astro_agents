@@ -19,8 +19,10 @@ import logging
 import os
 from typing import Any
 
-from openai import OpenAI, RateLimitError
+import httpx
+from openai import APITimeoutError, OpenAI, RateLimitError
 
+from shared.config import ROOT  # load .env
 from shared.models_catalog import DEEPSEEK_FLASH, MINIMAX_M3, resolve_model_id
 
 logger = logging.getLogger(__name__)
@@ -34,7 +36,9 @@ def _client() -> OpenAI:
         raise RuntimeError(
             "NVIDIA_API_KEY is not set. Create a key at build.nvidia.com and set it in the environment."
         )
-    return OpenAI(base_url=NVIDIA_BASE_URL, api_key=key)
+    timeout_s = float(os.getenv("NVIDIA_TIMEOUT_S", "90"))
+    http_timeout = httpx.Timeout(timeout_s, connect=20.0)
+    return OpenAI(base_url=NVIDIA_BASE_URL, api_key=key, timeout=http_timeout)
 
 
 def resolve_model(model: str | None = None) -> str:
@@ -164,8 +168,14 @@ def chat_messages(
         temperature,
         len(tools or []),
     )
+    timeout_s = float(os.getenv("NVIDIA_TIMEOUT_S", "90"))
     try:
-        completion = client.chat.completions.create(**kwargs)
+        completion = client.chat.completions.create(timeout=timeout_s, **kwargs)
+    except (APITimeoutError, httpx.TimeoutException) as exc:
+        logger.warning("nvidia timeout model=%s: %s", model_id, exc)
+        raise RuntimeError(
+            f"NVIDIA NIM timed out after {timeout_s:.0f}s for {model_id}. Retry or raise NVIDIA_TIMEOUT_S."
+        ) from exc
     except RateLimitError as exc:
         logger.warning("nvidia rate limited model=%s: %s", model_id, exc)
         raise RuntimeError(

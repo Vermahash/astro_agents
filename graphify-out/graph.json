@@ -1,0 +1,1073 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": {
+    "name": "astro_agents module links"
+  },
+  "nodes": [
+    {
+      "id": "mod_api_app",
+      "label": "api/app.py",
+      "file_type": "code",
+      "source_file": "api/app.py"
+    },
+    {
+      "id": "mod_api_schemas",
+      "label": "api/schemas.py",
+      "file_type": "code",
+      "source_file": "api/schemas.py"
+    },
+    {
+      "id": "mod_api___init__",
+      "label": "api/__init__.py",
+      "file_type": "code",
+      "source_file": "api/__init__.py"
+    },
+    {
+      "id": "mod_shared_answer_contract",
+      "label": "shared/answer_contract.py",
+      "file_type": "code",
+      "source_file": "shared/answer_contract.py"
+    },
+    {
+      "id": "mod_shared_ask_agent",
+      "label": "shared/ask_agent.py",
+      "file_type": "code",
+      "source_file": "shared/ask_agent.py"
+    },
+    {
+      "id": "mod_shared_ask_service",
+      "label": "shared/ask_service.py",
+      "file_type": "code",
+      "source_file": "shared/ask_service.py"
+    },
+    {
+      "id": "mod_shared_chart_key",
+      "label": "shared/chart_key.py",
+      "file_type": "code",
+      "source_file": "shared/chart_key.py"
+    },
+    {
+      "id": "mod_shared_chart_query",
+      "label": "shared/chart_query.py",
+      "file_type": "code",
+      "source_file": "shared/chart_query.py"
+    },
+    {
+      "id": "mod_shared_chart_service",
+      "label": "shared/chart_service.py",
+      "file_type": "code",
+      "source_file": "shared/chart_service.py"
+    },
+    {
+      "id": "mod_shared_chart_store",
+      "label": "shared/chart_store.py",
+      "file_type": "code",
+      "source_file": "shared/chart_store.py"
+    },
+    {
+      "id": "mod_shared_chart_tools",
+      "label": "shared/chart_tools.py",
+      "file_type": "code",
+      "source_file": "shared/chart_tools.py"
+    },
+    {
+      "id": "mod_shared_config",
+      "label": "shared/config.py",
+      "file_type": "code",
+      "source_file": "shared/config.py"
+    },
+    {
+      "id": "mod_shared_critic",
+      "label": "shared/critic.py",
+      "file_type": "code",
+      "source_file": "shared/critic.py"
+    },
+    {
+      "id": "mod_shared_domain_harness",
+      "label": "shared/domain_harness.py",
+      "file_type": "code",
+      "source_file": "shared/domain_harness.py"
+    },
+    {
+      "id": "mod_shared_harness_pipeline",
+      "label": "shared/harness_pipeline.py",
+      "file_type": "code",
+      "source_file": "shared/harness_pipeline.py"
+    },
+    {
+      "id": "mod_shared_llm_nvidia",
+      "label": "shared/llm_nvidia.py",
+      "file_type": "code",
+      "source_file": "shared/llm_nvidia.py"
+    },
+    {
+      "id": "mod_shared_models_catalog",
+      "label": "shared/models_catalog.py",
+      "file_type": "code",
+      "source_file": "shared/models_catalog.py"
+    },
+    {
+      "id": "mod_shared_packet_planner",
+      "label": "shared/packet_planner.py",
+      "file_type": "code",
+      "source_file": "shared/packet_planner.py"
+    },
+    {
+      "id": "mod_shared_pipeline_trace",
+      "label": "shared/pipeline_trace.py",
+      "file_type": "code",
+      "source_file": "shared/pipeline_trace.py"
+    },
+    {
+      "id": "mod_shared_places",
+      "label": "shared/places.py",
+      "file_type": "code",
+      "source_file": "shared/places.py"
+    },
+    {
+      "id": "mod_shared_prompts",
+      "label": "shared/prompts.py",
+      "file_type": "code",
+      "source_file": "shared/prompts.py"
+    },
+    {
+      "id": "mod_shared_rag_hnsw",
+      "label": "shared/rag_hnsw.py",
+      "file_type": "code",
+      "source_file": "shared/rag_hnsw.py"
+    },
+    {
+      "id": "mod_shared_specialists",
+      "label": "shared/specialists.py",
+      "file_type": "code",
+      "source_file": "shared/specialists.py"
+    },
+    {
+      "id": "mod_shared_usage",
+      "label": "shared/usage.py",
+      "file_type": "code",
+      "source_file": "shared/usage.py"
+    },
+    {
+      "id": "mod_shared_vedic_facts",
+      "label": "shared/vedic_facts.py",
+      "file_type": "code",
+      "source_file": "shared/vedic_facts.py"
+    },
+    {
+      "id": "mod_shared_web_law",
+      "label": "shared/web_law.py",
+      "file_type": "code",
+      "source_file": "shared/web_law.py"
+    },
+    {
+      "id": "mod_shared___init__",
+      "label": "shared/__init__.py",
+      "file_type": "code",
+      "source_file": "shared/__init__.py"
+    },
+    {
+      "id": "mod_mcp_server_chart_mcp",
+      "label": "mcp_server/chart_mcp.py",
+      "file_type": "code",
+      "source_file": "mcp_server/chart_mcp.py"
+    },
+    {
+      "id": "mod_mcp_server___init__",
+      "label": "mcp_server/__init__.py",
+      "file_type": "code",
+      "source_file": "mcp_server/__init__.py"
+    },
+    {
+      "id": "mod_tests_fixtures_packet",
+      "label": "tests/fixtures_packet.py",
+      "file_type": "code",
+      "source_file": "tests/fixtures_packet.py"
+    },
+    {
+      "id": "mod_tests_test_chart_service",
+      "label": "tests/test_chart_service.py",
+      "file_type": "code",
+      "source_file": "tests/test_chart_service.py"
+    },
+    {
+      "id": "mod_tests_test_chart_tools_agent",
+      "label": "tests/test_chart_tools_agent.py",
+      "file_type": "code",
+      "source_file": "tests/test_chart_tools_agent.py"
+    },
+    {
+      "id": "mod_tests_test_domain_harness",
+      "label": "tests/test_domain_harness.py",
+      "file_type": "code",
+      "source_file": "tests/test_domain_harness.py"
+    },
+    {
+      "id": "mod_tests_test_harness_pipeline",
+      "label": "tests/test_harness_pipeline.py",
+      "file_type": "code",
+      "source_file": "tests/test_harness_pipeline.py"
+    },
+    {
+      "id": "mod_tests_test_models_prompts",
+      "label": "tests/test_models_prompts.py",
+      "file_type": "code",
+      "source_file": "tests/test_models_prompts.py"
+    },
+    {
+      "id": "mod_tests_test_packet_planner",
+      "label": "tests/test_packet_planner.py",
+      "file_type": "code",
+      "source_file": "tests/test_packet_planner.py"
+    },
+    {
+      "id": "mod_tests___init__",
+      "label": "tests/__init__.py",
+      "file_type": "code",
+      "source_file": "tests/__init__.py"
+    },
+    {
+      "id": "mod_scripts_build_code_graph",
+      "label": "scripts/build_code_graph.py",
+      "file_type": "code",
+      "source_file": "scripts/build_code_graph.py"
+    },
+    {
+      "id": "mod_engine_astro_kp",
+      "label": "engine/astro_kp.py",
+      "file_type": "code",
+      "source_file": "engine/astro_kp.py"
+    },
+    {
+      "id": "mod_engine_yoga_engine",
+      "label": "engine/yoga_engine.py",
+      "file_type": "code",
+      "source_file": "engine/yoga_engine.py"
+    },
+    {
+      "id": "mod_engine_kp_logic",
+      "label": "engine/kp_logic.py",
+      "file_type": "code",
+      "source_file": "engine/kp_logic.py"
+    },
+    {
+      "id": "mod_engine_kp_master_rules",
+      "label": "engine/kp_master_rules.py",
+      "file_type": "code",
+      "source_file": "engine/kp_master_rules.py"
+    }
+  ],
+  "links": [
+    {
+      "source": "mod_api_app",
+      "target": "mod_api_schemas",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_api_app",
+      "target": "mod_api___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_api_app",
+      "target": "mod_shared_ask_service",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_api_app",
+      "target": "mod_shared_chart_service",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_api_app",
+      "target": "mod_shared_config",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_api_app",
+      "target": "mod_shared_domain_harness",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_api_app",
+      "target": "mod_shared_harness_pipeline",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_api_app",
+      "target": "mod_shared_models_catalog",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_api_app",
+      "target": "mod_shared_places",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_api_app",
+      "target": "mod_shared_rag_hnsw",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_api_app",
+      "target": "mod_shared_usage",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_api_app",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_api_app",
+      "target": "mod_engine_astro_kp",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_api_schemas",
+      "target": "mod_api___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_api___init__",
+      "target": "mod_engine_astro_kp",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_answer_contract",
+      "target": "mod_api___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_ask_agent",
+      "target": "mod_shared_chart_store",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_ask_agent",
+      "target": "mod_shared_chart_tools",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_ask_agent",
+      "target": "mod_shared_llm_nvidia",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_ask_agent",
+      "target": "mod_shared_pipeline_trace",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_ask_agent",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_ask_service",
+      "target": "mod_shared_ask_agent",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_ask_service",
+      "target": "mod_shared_chart_service",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_ask_service",
+      "target": "mod_shared_chart_store",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_ask_service",
+      "target": "mod_shared_domain_harness",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_ask_service",
+      "target": "mod_shared_harness_pipeline",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_ask_service",
+      "target": "mod_shared_llm_nvidia",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_ask_service",
+      "target": "mod_shared_models_catalog",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_ask_service",
+      "target": "mod_shared_packet_planner",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_ask_service",
+      "target": "mod_shared_pipeline_trace",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_ask_service",
+      "target": "mod_shared_prompts",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_ask_service",
+      "target": "mod_shared_usage",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_ask_service",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_chart_query",
+      "target": "mod_shared_chart_store",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_chart_query",
+      "target": "mod_shared_specialists",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_chart_query",
+      "target": "mod_shared_vedic_facts",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_chart_query",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_chart_service",
+      "target": "mod_shared_chart_key",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_chart_service",
+      "target": "mod_shared_chart_store",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_chart_service",
+      "target": "mod_shared_config",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_chart_service",
+      "target": "mod_shared_pipeline_trace",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_chart_service",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_chart_service",
+      "target": "mod_engine_astro_kp",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_chart_store",
+      "target": "mod_shared_chart_service",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_chart_store",
+      "target": "mod_shared_config",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_chart_store",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_chart_tools",
+      "target": "mod_shared_chart_query",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_chart_tools",
+      "target": "mod_shared_chart_store",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_chart_tools",
+      "target": "mod_shared_domain_harness",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_chart_tools",
+      "target": "mod_shared_places",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_chart_tools",
+      "target": "mod_shared_rag_hnsw",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_chart_tools",
+      "target": "mod_shared_web_law",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_chart_tools",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_config",
+      "target": "mod_api___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_config",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_critic",
+      "target": "mod_shared_vedic_facts",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_critic",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_domain_harness",
+      "target": "mod_tests___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_harness_pipeline",
+      "target": "mod_shared_critic",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_harness_pipeline",
+      "target": "mod_shared_domain_harness",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_harness_pipeline",
+      "target": "mod_shared_llm_nvidia",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_harness_pipeline",
+      "target": "mod_shared_pipeline_trace",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_harness_pipeline",
+      "target": "mod_shared_prompts",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_harness_pipeline",
+      "target": "mod_shared_rag_hnsw",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_harness_pipeline",
+      "target": "mod_shared_specialists",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_harness_pipeline",
+      "target": "mod_shared_usage",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_harness_pipeline",
+      "target": "mod_shared_web_law",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_harness_pipeline",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_llm_nvidia",
+      "target": "mod_api___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_llm_nvidia",
+      "target": "mod_shared_config",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_llm_nvidia",
+      "target": "mod_shared_models_catalog",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_llm_nvidia",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_pipeline_trace",
+      "target": "mod_shared_config",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_pipeline_trace",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_places",
+      "target": "mod_shared_chart_service",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_places",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_places",
+      "target": "mod_engine_astro_kp",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_prompts",
+      "target": "mod_shared_answer_contract",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_prompts",
+      "target": "mod_shared_config",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_prompts",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_rag_hnsw",
+      "target": "mod_shared_config",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_rag_hnsw",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_specialists",
+      "target": "mod_shared_vedic_facts",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_specialists",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_usage",
+      "target": "mod_shared_config",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_usage",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_vedic_facts",
+      "target": "mod_tests___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_vedic_facts",
+      "target": "mod_engine_astro_kp",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_web_law",
+      "target": "mod_api___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared___init__",
+      "target": "mod_api___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_mcp_server_chart_mcp",
+      "target": "mod_shared_chart_tools",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_mcp_server_chart_mcp",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_mcp_server_chart_mcp",
+      "target": "mod_mcp_server___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_mcp_server_chart_mcp",
+      "target": "mod_tests___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_mcp_server___init__",
+      "target": "mod_mcp_server_chart_mcp",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_fixtures_packet",
+      "target": "mod_tests___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_chart_service",
+      "target": "mod_shared_chart_key",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_chart_service",
+      "target": "mod_shared_chart_service",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_chart_service",
+      "target": "mod_shared_chart_store",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_chart_service",
+      "target": "mod_shared_config",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_chart_service",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_chart_service",
+      "target": "mod_tests___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_chart_tools_agent",
+      "target": "mod_shared_ask_agent",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_chart_tools_agent",
+      "target": "mod_shared_chart_store",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_chart_tools_agent",
+      "target": "mod_shared_chart_tools",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_chart_tools_agent",
+      "target": "mod_shared_pipeline_trace",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_chart_tools_agent",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_chart_tools_agent",
+      "target": "mod_mcp_server_chart_mcp",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_chart_tools_agent",
+      "target": "mod_mcp_server___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_domain_harness",
+      "target": "mod_shared_domain_harness",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_domain_harness",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_harness_pipeline",
+      "target": "mod_shared_chart_query",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_harness_pipeline",
+      "target": "mod_shared_critic",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_harness_pipeline",
+      "target": "mod_shared_domain_harness",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_harness_pipeline",
+      "target": "mod_shared_harness_pipeline",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_harness_pipeline",
+      "target": "mod_shared_pipeline_trace",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_harness_pipeline",
+      "target": "mod_shared_prompts",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_harness_pipeline",
+      "target": "mod_shared_rag_hnsw",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_harness_pipeline",
+      "target": "mod_shared_specialists",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_harness_pipeline",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_harness_pipeline",
+      "target": "mod_tests_fixtures_packet",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_harness_pipeline",
+      "target": "mod_tests___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_models_prompts",
+      "target": "mod_shared_models_catalog",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_models_prompts",
+      "target": "mod_shared_prompts",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_models_prompts",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_packet_planner",
+      "target": "mod_shared_packet_planner",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_packet_planner",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_scripts_build_code_graph",
+      "target": "mod_api_app",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_scripts_build_code_graph",
+      "target": "mod_api___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_scripts_build_code_graph",
+      "target": "mod_shared_ask_service",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_scripts_build_code_graph",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_scripts_build_code_graph",
+      "target": "mod_mcp_server___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_scripts_build_code_graph",
+      "target": "mod_tests___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_engine_astro_kp",
+      "target": "mod_api___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_engine_kp_master_rules",
+      "target": "mod_tests___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    }
+  ]
+}

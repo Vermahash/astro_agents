@@ -28,7 +28,7 @@ if str(_ROOT) not in sys.path:
 
 from mcp.server.mcpserver import MCPServer
 
-from shared.chart_tools import TOOLS, run_tool, tool_names
+from shared.chart_tools import TOOLS, TOOLS_BY_NAME, run_tool, tool_names
 
 mcp = MCPServer(
     name="astro-chart-tools",
@@ -76,6 +76,42 @@ def search_places(q: str, limit: int = 10) -> Any:
     return _unwrap("search_places", q=q, limit=limit)
 
 
+@mcp.tool(description=TOOLS_BY_NAME["get_harness_plan"].description)
+def get_harness_plan(question: str) -> Any:
+    return _unwrap("get_harness_plan", question=question)
+
+
+@mcp.tool(description=TOOLS_BY_NAME["search_books"].description)
+def search_books(q: str, k: int = 5) -> Any:
+    return _unwrap("search_books", q=q, k=k)
+
+
+@mcp.tool(description=TOOLS_BY_NAME["search_classical_law"].description)
+def search_classical_law(q: str, limit: int = 3) -> Any:
+    return _unwrap("search_classical_law", q=q, limit=limit)
+
+
+@mcp.tool(description=TOOLS_BY_NAME["run_chart_query"].description)
+def run_chart_query(
+    chart_key: str,
+    op: str,
+    house: int | None = None,
+    planet: str | None = None,
+    division: int | None = None,
+    houses: list[int] | None = None,
+) -> Any:
+    args: dict[str, Any] = {"chart_key": chart_key, "op": op}
+    if house is not None:
+        args["house"] = house
+    if planet is not None:
+        args["planet"] = planet
+    if division is not None:
+        args["division"] = division
+    if houses is not None:
+        args["houses"] = houses
+    return _unwrap("run_chart_query", **args)
+
+
 def registry_tool_names() -> list[str]:
     """Names from the shared registry (for catalog parity tests)."""
     return tool_names()
@@ -90,6 +126,10 @@ def mcp_exposed_tool_names() -> list[str]:
         "get_cusp",
         "get_planet",
         "search_places",
+        "get_harness_plan",
+        "search_books",
+        "search_classical_law",
+        "run_chart_query",
     ]
 
 

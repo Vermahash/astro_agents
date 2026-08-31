@@ -46,3 +46,8 @@ def test_planet_taste_prompt_loaded():
 def test_default_prompt_has_contract():
     text = load_system_prompt("default")
     assert "KP STRICT MODE" in text
+
+
+def test_pre_audit_prompt_loads():
+    text = load_system_prompt("pre_audit")
+    assert "Brain synthesizer" in text or "PRE-AUDIT" in text or "checkpoint" in text.lower()
