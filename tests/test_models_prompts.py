@@ -51,3 +51,26 @@ def test_default_prompt_has_contract():
 def test_pre_audit_prompt_loads():
     text = load_system_prompt("pre_audit")
     assert "Brain synthesizer" in text or "PRE-AUDIT" in text or "checkpoint" in text.lower()
+
+
+def test_ask_and_harness_audit_request_schemas():
+    from api.schemas import AskRequest, HarnessAuditRequest
+
+    audit = HarnessAuditRequest(chart_key="k" * 40, question="finances")
+    assert audit.use_rag is False
+    ask = AskRequest(chart_key="k" * 40, question="How is his health?")
+    assert ask.prompt_profile == "pre_audit"
+    assert ask.use_web_law is False
+
+
+def test_harness_plan_http_joins_finance_and_health():
+    from fastapi.testclient import TestClient
+
+    from api.app import app
+
+    client = TestClient(app)
+    res = client.get("/v1/harness/plan", params={"q": "Tell me about health and finances"})
+    assert res.status_code == 200
+    body = res.json()
+    assert "finance" in body["domains"] and "health" in body["domains"]
+    assert "ashtakavarga_sav" in body["keys"]

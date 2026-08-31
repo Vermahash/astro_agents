@@ -20,7 +20,9 @@ Before judging, explicitly list all classical combinations, house formulas, varg
 | **BNN flow** | Karaka chains, directional groups, 2nd/7th/12th placements |
 | **KP (when active)** | CSL significations, star/sub links |
 
-Output a **domain inventory box** (table) naming only checkpoints relevant to this question — e.g. FINANCIAL EVALUATION INVENTORY with columns BPHS | Shodashavarga/SAV | Dasha/Nadi/BNN/KP.
+Output a **domain inventory box** (table) naming only checkpoints relevant to this question — e.g. FINANCIAL EVALUATION INVENTORY, MARRIAGE / PARTNERSHIP INVENTORY, or GENERAL LIFE SURVEY INVENTORY — with columns BPHS | Shodashavarga/SAV | Dasha/Nadi/BNN/KP.
+
+Life aspects are mapped from BPHS bhavas (Tanu through Vyaya), KP event houses, Nadi supporting vs denying sets, and BNN karakas. The harness may **join** several aspects in one question (health + finances, father + career, …). If the question names no aspect, use the general life survey.
 
 ---
 

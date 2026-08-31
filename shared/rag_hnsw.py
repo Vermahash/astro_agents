@@ -40,7 +40,8 @@ CHUNK_OVERLAP = 120
 _TOKEN = re.compile(r"[a-z0-9]{3,}")
 
 DEFAULT_ROOTS = (
-    Path(os.getenv("ASTRO_N8N_ROOT", r"B:\n8n\astro")),
+    Path(os.getenv("ASTRO_N8N_ROOT", r"B:\n8n\astro")) / "knowledge",
+    Path(os.getenv("ASTRO_N8N_ROOT", r"B:\n8n\astro")) / "kp-calculator" / "docs",
     ROOT / "docs" / "prompts",
 )
 
@@ -101,10 +102,26 @@ def embed_text(text: str, dim: int = DIM) -> list[float]:
 def _iter_text_files(root: Path) -> Iterator[Path]:
     if not root.exists():
         return
-    skip = {".git", "node_modules", "__pycache__", "data", ".extracted", "archive"}
+    skip = {
+        ".git",
+        "node_modules",
+        "__pycache__",
+        "data",
+        ".extracted",
+        "archive",
+        "tools",
+        "dist",
+        "build",
+        ".venv",
+        "venv",
+    }
     # allow .extracted json chunks explicitly below
     for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = [d for d in dirnames if d not in skip and not d.startswith(".")]
+        dirnames[:] = [
+            d
+            for d in dirnames
+            if d not in skip and not d.startswith(".") and "tesseract" not in d.lower()
+        ]
         pdir = Path(dirpath)
         for name in filenames:
             suf = Path(name).suffix.lower()
@@ -177,7 +194,9 @@ def collect_documents(roots: list[Path] | None = None) -> list[tuple[str, str]]:
             except Exception:
                 continue
             docs.append((str(fp), raw))
-        extracted = root / "kp-calculator" / ".extracted" / "kp_book_chunks.json"
+        extracted = root / ".extracted" / "kp_book_chunks.json"
+        if not extracted.exists():
+            extracted = root.parent / ".extracted" / "kp_book_chunks.json"
         if extracted.exists():
             docs.extend(_load_extracted_json(extracted))
     extra = Path(os.getenv("ASTRO_N8N_ROOT", r"B:\n8n\astro")) / "kp-calculator" / ".extracted" / "kp_book_chunks.json"

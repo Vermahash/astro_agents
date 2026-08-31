@@ -36,6 +36,32 @@ MAX_RAG_SNIPPETS = 4
 MAX_LAW_HITS = 2
 
 
+def _doctrine_hits(question: str, plan: dict[str, Any]) -> list[dict[str, Any]]:
+    """
+    Search indexed books with the user question plus each domain's book_query.
+
+    Returns:
+        Deduped RAG hits (doctrine only).
+    """
+    hits: list[dict[str, Any]] = []
+    seen: set[Any] = set()
+    queries = [question, *(plan.get("book_queries") or [])]
+    for q in queries:
+        q = (q or "").strip()
+        if len(q) < 3:
+            continue
+        rag = search_books(q, k=MAX_RAG_SNIPPETS)
+        for h in rag.get("hits") or []:
+            key = h.get("id") or (h.get("source"), (h.get("text") or "")[:48])
+            if key in seen:
+                continue
+            seen.add(key)
+            hits.append(h)
+            if len(hits) >= MAX_RAG_SNIPPETS + 4:
+                return hits
+    return hits
+
+
 def collect_harness_evidence(question: str, doc: dict[str, Any], *, use_rag: bool = False) -> dict[str, Any]:
     """
     Run router + slices + specialists (no LLM).
@@ -53,7 +79,7 @@ def collect_harness_evidence(question: str, doc: dict[str, Any], *, use_rag: boo
     rag_hits: list[dict[str, Any]] = []
     if use_rag:
         try:
-            rag_hits = (search_books(question, k=MAX_RAG_SNIPPETS).get("hits") or [])
+            rag_hits = _doctrine_hits(question, plan)
         except Exception as exc:
             logger.info("rag skipped: %s", exc)
     return {
@@ -109,6 +135,122 @@ def format_inventory_box(plan: dict[str, Any]) -> str:
         f"{'BPHS / PARASHARI':<28}{'SHODASHAVARGA / SAV':<32}DASHA, NADI, KP & BNN\n"
         f"{col(bphs)}\n---\n{col(varga)}\n---\n{col(rest)}\n"
     )
+
+
+def _verdict_from_tally(tally: dict[str, int]) -> tuple[str, str]:
+    """Map specialist counts to PRE-AUDIT verdict and confidence."""
+    s = int(tally.get("SUPPORTS") or 0)
+    r = int(tally.get("RESISTS") or 0)
+    m = int(tally.get("MIXED") or 0)
+    missing = int(tally.get("NOT IN PACKET") or 0)
+    total = s + r + m + int(tally.get("NOT ACTIVATED") or 0) + missing
+    if missing and missing >= max(total, 1) / 2:
+        return "INSUFFICIENT DATA", "LOW"
+    if s > r * 2 and s >= m:
+        return "YES", "HIGH" if missing == 0 else "MEDIUM"
+    if r > s:
+        return "NO", "MEDIUM"
+    return "MIXED", "MEDIUM"
+
+
+def _lagna_deg_in_sign(lagna: dict[str, Any]) -> str:
+    """Degree-in-sign for the Lagna citation (never the absolute sidereal longitude)."""
+    lon = lagna.get("longitude")
+    if lon is None:
+        return "?"
+    try:
+        return f"{float(lon) % 30.0:.4f}"
+    except (TypeError, ValueError):
+        return str(lon)
+
+
+def format_pre_audit_answer(
+    *,
+    question: str,
+    plan: dict[str, Any],
+    facts: dict[str, Any],
+    audit_rows: list[dict[str, Any]],
+    rag_hits: list[dict[str, Any]] | None = None,
+    law_hits: list[dict[str, Any]] | None = None,
+    meta: dict[str, Any] | None = None,
+) -> str:
+    """
+    Build the required PRE-AUDIT report from Python checkpoints only.
+
+    Inputs:
+        question, harness plan, compact facts, specialist rows, optional RAG/law.
+    Outputs:
+        Inventory box, audit table, verdict citing fulfilled/failed checkpoints.
+    """
+    meta = meta or {}
+    tally = tally_status(audit_rows)
+    verdict, confidence = _verdict_from_tally(tally)
+    lagna = facts.get("lagna") or {}
+    name = meta.get("name") or "Native"
+    lines: list[str] = [
+        format_inventory_box(plan).rstrip(),
+        "",
+        f"1. Data sufficiency: packet has lagna={lagna.get('sign')} "
+        f"{_lagna_deg_in_sign(lagna)}° (sidereal {lagna.get('longitude')}), "
+        f"{len(facts.get('planets') or {})} planets, "
+        f"SAV houses={len(facts.get('sav') or {})}.",
+        f"Domain: {', '.join(plan.get('domains') or [])}. Mode: BPHS + Varga/SAV + Nadi + KP + BNN.",
+        f"Book map: {'; '.join(plan.get('book_sources') or []) or 'general BPHS 12 bhavas'}.",
+        "",
+        "2. Parameter blocks (from Python packet):",
+    ]
+    for h in plan.get("houses") or []:
+        row = (facts.get("houses") or facts.get("all_houses") or {}).get(str(h)) or {}
+        occ = [str(o.get("planet")) for o in row.get("occupants") or [] if o.get("planet")]
+        lines.append(
+            f"   H{h} {row.get('sign')} lord {row.get('lord')} SAV={row.get('sav')} occupants={occ or 'empty'}"
+        )
+    dasha = facts.get("dasha")
+    if dasha:
+        lines.append(f"   Dasha: {dasha}")
+    if facts.get("exchanges"):
+        lines.append(f"   Exchanges: {facts.get('exchanges')}")
+    lines += ["", "3. Systematic evidence audit:", "   Checkpoint | Status | Cite"]
+    fulfilled: list[str] = []
+    failed: list[str] = []
+    for r in audit_rows:
+        st = r.get("status") or ""
+        lab = r.get("label") or r.get("id")
+        lines.append(f"   {lab} | {st} | {r.get('cite')}")
+        if st == "SUPPORTS":
+            fulfilled.append(str(lab))
+        elif st in ("RESISTS", "NOT IN PACKET"):
+            failed.append(str(lab))
+    lines += [
+        "",
+        f"4. Evidence tally: {tally}",
+        "",
+        "5. Interpretation: Verdict is derived only from the audit balance above. "
+        "SUPPORTS vs RESISTS on the listed checkpoints — not from general astrology.",
+        "",
+        f"6. Final verdict: {verdict} (confidence {confidence}).",
+        f"   Fulfilled: {'; '.join(fulfilled[:8]) or 'none'}.",
+        f"   Failed/missing: {'; '.join(failed[:8]) or 'none'}.",
+        f"   Question: {question.strip()}",
+        f"   Chart: {name}.",
+        "",
+        "7. Timing windows: only from packet dasha/transit fields "
+        f"({dasha if dasha else 'NOT IN PACKET'}).",
+        "",
+        "8. Karma alignment: Practical discipline around houses that RESISTS "
+        "(the audit table names them). Not a guarantee.",
+        "",
+        "9. System limits: Not financial, medical, or legal advice. Macro conditions and choices govern outcomes.",
+    ]
+    if rag_hits:
+        lines.append("10. Doctrine snippets (not numbers):")
+        for h in rag_hits[:3]:
+            lines.append(f"    - {(h.get('topic') or '')} / {str(h.get('source') or '')[-60:]}")
+    if law_hits:
+        lines.append("11. Classical-law web (doctrine):")
+        for h in law_hits[:2]:
+            lines.append(f"    - {h.get('title')}: {h.get('snippet')}")
+    return "\n".join(lines)
 
 
 def build_brain_user_message(
@@ -233,9 +375,8 @@ def run_harness(
     if use_rag:
         with step(tr, "rag_search"):
             try:
-                rag = search_books(question, k=MAX_RAG_SNIPPETS)
-                rag_hits = rag.get("hits") or []
-                tr.mark("rag", detail={"ok": rag.get("ok"), "backend": rag.get("backend"), "hits": len(rag_hits)})
+                rag_hits = _doctrine_hits(question, plan)
+                tr.mark("rag", detail={"ok": True, "hits": len(rag_hits), "queries": len(plan.get("book_queries") or []) + 1})
             except Exception as exc:
                 logger.info("rag skipped: %s", exc)
                 tr.mark("rag_error", detail={"error": str(exc)[:200]})
@@ -263,18 +404,40 @@ def run_harness(
         )
 
     with step(tr, "brain_synthesize", model=str(model or "default")[:24]):
-        result = chat_completion(system=system, user=user, max_tokens=max_tokens, model=model, temperature=0.4)
-        tr.mark(
-            "llm_response",
-            detail={
-                "model": result["model"],
-                "prompt_tokens": result["prompt_tokens"],
-                "completion_tokens": result["completion_tokens"],
-                "answer_chars": len(result.get("content") or ""),
-            },
-        )
-        if not (result.get("content") or "").strip():
-            raise RuntimeError("Brain returned empty answer. Retry with higher max_tokens.")
+        result: dict[str, Any]
+        try:
+            result = chat_completion(system=system, user=user, max_tokens=max_tokens, model=model, temperature=0.4)
+            if not (result.get("content") or "").strip():
+                raise RuntimeError("Brain returned empty answer")
+            tr.mark(
+                "llm_response",
+                detail={
+                    "model": result["model"],
+                    "prompt_tokens": result["prompt_tokens"],
+                    "completion_tokens": result["completion_tokens"],
+                    "answer_chars": len(result.get("content") or ""),
+                },
+            )
+            mode = "harness"
+        except Exception as exc:
+            logger.warning("brain LLM failed (%s); using Python PRE-AUDIT synthesizer", exc)
+            answer = format_pre_audit_answer(
+                question=question,
+                plan=plan,
+                facts=facts,
+                audit_rows=audit_rows,
+                rag_hits=rag_hits,
+                law_hits=law_hits,
+                meta=meta,
+            )
+            result = {
+                "content": answer,
+                "model": "python-audit",
+                "prompt_tokens": 0,
+                "completion_tokens": 0,
+            }
+            tr.mark("brain_fallback", detail={"reason": str(exc)[:200], "answer_chars": len(answer)})
+            mode = "harness_fallback"
 
     answer = result["content"]
     with step(tr, "critic"):
@@ -310,7 +473,7 @@ def run_harness(
             "matched_topics": plan["domains"],
         },
         "tools_used": [],
-        "mode": "harness",
+        "mode": mode,
         "prompt_profile": prompt_profile,
         "harness_plan": {k: plan[k] for k in ("domains", "domain", "inventory_title", "keys", "specialists", "nadi_combos", "kp_cusps", "houses")},
         "specialist_audit": audit_rows,

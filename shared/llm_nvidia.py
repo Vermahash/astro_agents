@@ -38,7 +38,12 @@ def _client() -> OpenAI:
         )
     timeout_s = float(os.getenv("NVIDIA_TIMEOUT_S", "90"))
     http_timeout = httpx.Timeout(timeout_s, connect=20.0)
-    return OpenAI(base_url=NVIDIA_BASE_URL, api_key=key, timeout=http_timeout)
+    return OpenAI(
+        base_url=NVIDIA_BASE_URL,
+        api_key=key,
+        timeout=http_timeout,
+        max_retries=0,
+    )
 
 
 def resolve_model(model: str | None = None) -> str:

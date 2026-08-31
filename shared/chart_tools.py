@@ -320,8 +320,10 @@ TOOLS: list[ToolSpec] = [
     ToolSpec(
         name="get_harness_plan",
         description=(
-            "Classify the question into life domains (finance, health, marriage, …) "
-            "and return which payload keys, houses, planets, and specialists the harness will use."
+            "Classify the question into life domains from the BPHS 12-bhava map "
+            "(finance, health, marriage, career, children, education, foreign, siblings, "
+            "home/property, litigation, longevity, father/dharma, gains, spirituality, self, general) "
+            "and return payload keys, houses, planets, specialists, and book queries."
         ),
         parameters={
             "type": "object",

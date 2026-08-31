@@ -63,16 +63,21 @@ class PlaceHit(BaseModel):
 
 
 class HarnessAuditRequest(BaseModel):
+    """Python-only PRE-AUDIT inspection (no LLM)."""
+
     chart_key: str
     question: str = Field(..., min_length=1)
     use_rag: bool = False
+
+
+class AskRequest(BaseModel):
     chart_key: str
     question: str = Field(..., min_length=1)
     history: list[dict[str, str]] = Field(default_factory=list)
     max_tokens: int = Field(default=4096, ge=200, le=8192)
     model: str | None = Field(
         default=None,
-        description="NIM model id or alias: muse | minimax | meta/muse-glimmer-30b | minimaxai/minimax-m3",
+        description="NIM model id or alias: muse | minimax | deepseek | meta/muse-glimmer-30b",
     )
     prompt_profile: str = Field(
         default="pre_audit",

@@ -1,4 +1,6 @@
-# API.md � Chart & Ask service
+# API.md — Chart & Ask service
+
+Pipeline flow charts (chart compute, ask routing, PRE-AUDIT, RAG, MCP): [README.md](README.md).
 
 Base URL (laptop): `http://127.0.0.1:8080`
 
@@ -139,15 +141,23 @@ Interpretive Q&A with NVIDIA NIM:
 }
 ```
 
-`mode` is `harness` (PRE-AUDIT Brain), `tools`, or `fallback_planner`. Requires `NVIDIA_API_KEY`. Enforces `ASTRO_MONTHLY_BUDGET_USD` (default 5).
+`mode` is `harness` (PRE-AUDIT Brain), `harness_fallback` (Python synthesizer if NIM times out), `tools`, or `fallback_planner`.
+
+### `GET /v1/harness/aspects`
+
+BPHS 12-bhava names plus every PRE-AUDIT life aspect (houses, Nadi sets, KP cusps, book query). No LLM.
 
 ### `GET /v1/harness/plan?q=`
 
-Preview domain routing (no LLM). Example: `q=Tell me about his finances`.
+Preview domain routing (no LLM). Joins multiple life aspects, e.g. `q=Tell me about health and finances` or `q=Will I buy a house?` (home/Sukha). Unmatched questions use `general` (life survey).
 
 ### `POST /v1/rag/index`
 
-Rebuild HNSW index from `ASTRO_N8N_ROOT` (default `B:\n8n\astro`) plus `docs/prompts`.
+Rebuild HNSW index from `ASTRO_N8N_ROOT/knowledge`, `kp-calculator/docs`, extracted KP book JSON, and repo `docs/prompts`.
+
+### `GET /v1/rag/search?q=&k=5`
+
+Doctrine search over the local RAG index. Does not return chart numbers.
 
 ### `POST /v1/harness/audit`
 
@@ -156,8 +166,6 @@ Python-only PRE-AUDIT (no LLM): domain plan, SAV, specialist checkpoint table.
 ```json
 { "chart_key": "sha256...", "question": "Tell me about his finances", "use_rag": false }
 ```
-
-Doctrine search over the local RAG index. Does not return chart numbers.
 
 ### `GET /v1/places?q=&limit=20`
 

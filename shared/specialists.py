@@ -14,6 +14,7 @@ Outputs:
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from shared.vedic_facts import (
@@ -60,7 +61,7 @@ def _sav(facts: dict[str, Any], house: int) -> int | None:
 
 
 def _house_row(facts: dict[str, Any], house: int) -> dict[str, Any]:
-    return (facts.get("houses") or {}).get(str(house)) or {}
+    return (facts.get("houses") or {}).get(str(house)) or (facts.get("all_houses") or {}).get(str(house)) or {}
 
 
 def _planet_row(facts: dict[str, Any], name: str) -> dict[str, Any]:
@@ -105,7 +106,7 @@ def compact_facts(slices: dict[str, Any], plan: dict[str, Any]) -> dict[str, Any
         asc_lon_f = None
     asc_sign = sign_index(asc_lon_f) if asc_lon_f is not None else None
 
-    wanted_planets = [str(p) for p in (plan.get("planets") or PLANET_ORDER)]
+    wanted_planets = list(PLANET_ORDER)
     wanted_houses = [int(h) for h in (plan.get("houses") or list(range(1, 13)))]
 
     planets: dict[str, Any] = {}
@@ -153,6 +154,7 @@ def compact_facts(slices: dict[str, Any], plan: dict[str, Any]) -> dict[str, Any
             sidx = house_sign_index(asc_sign, h)
             occupants: list[dict[str, Any]] = []
             uk_row = uk_houses.get(f"H{h}") or uk_houses.get(str(h)) or []
+            seen_occ: set[str] = set()
             if isinstance(uk_row, list):
                 for row in uk_row:
                     if not isinstance(row, dict):
@@ -160,6 +162,10 @@ def compact_facts(slices: dict[str, Any], plan: dict[str, Any]) -> dict[str, Any
                     pname = row.get("planet")
                     if not pname:
                         continue
+                    occ_key = str(pname).lower()
+                    if occ_key in seen_occ:
+                        continue
+                    seen_occ.add(occ_key)
                     occupants.append(
                         {
                             "planet": pname,
@@ -234,8 +240,11 @@ def compact_facts(slices: dict[str, Any], plan: dict[str, Any]) -> dict[str, Any
         lon_f = float(prow["longitude"])
         vargas[pname] = {
             "D2": ZODIAC_SIGNS[get_varga_sign(lon_f, 2)],
+            "D4": ZODIAC_SIGNS[get_varga_sign(lon_f, 4)],
+            "D7": ZODIAC_SIGNS[get_varga_sign(lon_f, 7)],
             "D9": ZODIAC_SIGNS[get_varga_sign(lon_f, 9)],
             "D10": ZODIAC_SIGNS[get_varga_sign(lon_f, 10)],
+            "D12": ZODIAC_SIGNS[get_varga_sign(lon_f, 12)],
             "D30": ZODIAC_SIGNS[get_varga_sign(lon_f, 30)],
         }
 
@@ -307,24 +316,9 @@ def specialist_bphs(facts: dict[str, Any], plan: dict[str, Any]) -> dict[str, An
             continue
         cid = cp.get("id") or ""
         label = cp.get("label") or cid
-        if cid in ("d1_h2",) or cid.endswith("_h2") and "d1" in cid:
-            rows.append(_bphs_house_checkpoint(facts, 2, label, cid))
-        elif cid in ("d1_h11",):
-            rows.append(_bphs_house_checkpoint(facts, 11, label, cid))
-        elif cid in ("d1_h9",):
-            rows.append(_bphs_house_checkpoint(facts, 9, label, cid))
-        elif cid in ("d1_h1",):
-            rows.append(_bphs_house_checkpoint(facts, 1, label, cid))
-        elif cid in ("d1_h6",):
-            rows.append(_bphs_house_checkpoint(facts, 6, label, cid))
-        elif cid in ("d1_h8",):
-            rows.append(_bphs_house_checkpoint(facts, 8, label, cid))
-        elif cid in ("d1_h12",):
-            rows.append(_bphs_house_checkpoint(facts, 12, label, cid))
-        elif cid in ("d1_h7",):
-            rows.append(_bphs_house_checkpoint(facts, 7, label, cid))
-        elif cid in ("d1_h10",):
-            rows.append(_bphs_house_checkpoint(facts, 10, label, cid))
+        house_m = re.match(r"d1_h(\d{1,2})$", cid)
+        if house_m:
+            rows.append(_bphs_house_checkpoint(facts, int(house_m.group(1)), label, cid))
         elif cid == "d1_1_10_links":
             l1 = facts.get("lagna") or {}
             if l1.get("sign_index") is None:
@@ -344,12 +338,14 @@ def specialist_bphs(facts: dict[str, Any], plan: dict[str, Any]) -> dict[str, An
                         {"exchanges": ex, "lord": ten},
                     )
                 )
-        elif cid in ("yogas_dhana", "yogas_health"):
-            needles = (
-                ("parivartana", "dhana", "raja", "harsha", "sarala", "vipareeta", "lakshmi")
-                if cid == "yogas_dhana"
-                else ("arogya", "vipareeta", "kemadruma", "papakartari", "guru", "chandra")
-            )
+        elif cid.startswith("yogas_"):
+            raw = cp.get("needles")
+            if isinstance(raw, (list, tuple)) and raw:
+                needles = tuple(str(x) for x in raw)
+            elif cid == "yogas_dhana":
+                needles = ("parivartana", "dhana", "raja", "harsha", "sarala", "vipareeta", "lakshmi")
+            else:
+                needles = ("parivartana", "raja", "dhana", "vipareeta")
             hits = _yoga_hits(facts, needles)
             ex = facts.get("exchanges") or []
             if hits or ex:
@@ -423,6 +419,13 @@ def specialist_varga_sav(facts: dict[str, Any], plan: dict[str, Any]) -> dict[st
                 malefic_d30 = [p for p, v in vargas.items() if v.get("D30") in ("Aries", "Scorpio", "Capricorn", "Aquarius") and p in ("Mars", "Saturn", "Rahu", "Sun")]
                 status = "RESISTS" if malefic_d30 else "MIXED"
                 rows.append(_cp(cid, label, status, f"D30: { {p: v.get('D30') for p, v in vargas.items()} }; harsh={malefic_d30}", {"d30": {p: v.get("D30") for p, v in vargas.items()}}))
+        elif cid.startswith("d4_") or cid.startswith("d7_") or cid.startswith("d12_"):
+            key = "D4" if cid.startswith("d4_") else ("D7" if cid.startswith("d7_") else "D12")
+            if not vargas:
+                rows.append(_cp(cid, label, "NOT IN PACKET", f"no {key}"))
+            else:
+                mapping = {p: v.get(key) for p, v in vargas.items()}
+                rows.append(_cp(cid, label, "SUPPORTS", f"{key} signs: {mapping}", {key.lower(): mapping}))
         else:
             rows.append(_cp(cid, label, "NOT ACTIVATED", "no extractor"))
     return {"specialist": "varga_sav", "checkpoints": rows}
@@ -454,9 +457,8 @@ def specialist_dasha_nadi(facts: dict[str, Any], plan: dict[str, Any]) -> dict[s
                 rows.append(_cp(cid, label, "SUPPORTS", f"dasha balance at birth: {dasha}", {"dasha": dasha}))
         elif cid.startswith("nadi_"):
             key = cid.replace("nadi_", "")
-            combo = nadi.get(key)
+            combo = cp.get("houses") or nadi.get(key)
             if not combo:
-                # try common aliases
                 combo = nadi.get(cid) or []
             if not combo:
                 rows.append(_cp(cid, label, "NOT ACTIVATED", f"no nadi combo for {key}"))

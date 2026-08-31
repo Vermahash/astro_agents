@@ -17,3 +17,11 @@ def test_marriage_question():
     assert classify_domain("Is marriage promised?") == "marriage"
     plan = build_harness_plan("Is marriage promised?")
     assert 7 in plan["kp_cusps"]
+
+
+def test_home_and_siblings_from_bphs_bhavas():
+    assert classify_domain("Will I buy a vehicle?") == "home"
+    home = build_harness_plan("mother and property")
+    assert 4 in home["houses"]
+    assert home["book_queries"]
+    assert classify_domain("younger brother") == "siblings"

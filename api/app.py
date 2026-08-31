@@ -161,6 +161,14 @@ def models() -> dict[str, Any]:
     return {"default": default_model(), "models": list_models()}
 
 
+@app.get("/v1/harness/aspects")
+def harness_aspects() -> dict[str, Any]:
+    """BPHS 12-bhava map and every PRE-AUDIT life aspect (no LLM)."""
+    from shared.life_aspects import BHAVA_NAMES, list_aspects
+
+    return {"bhavas": BHAVA_NAMES, "aspects": list_aspects()}
+
+
 @app.get("/v1/harness/plan")
 def harness_plan(q: str) -> dict[str, Any]:
     """Preview domain routing for a question (no LLM)."""

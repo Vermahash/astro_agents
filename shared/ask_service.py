@@ -34,18 +34,14 @@ logger = logging.getLogger(__name__)
 
 MAX_PACKET_CHARS = 24_000
 HARNESS_PROFILES = frozenset({"pre_audit"})
-HARNESS_DOMAINS = frozenset({"finance", "health", "marriage", "career", "children", "education", "foreign"})
 
 
 def _should_use_harness(prompt_profile: str, question: str) -> bool:
-    """PRE-AUDIT Brain path for pre_audit profile and domain questions on default."""
+    """PRE-AUDIT path for every life question except planet_taste."""
     name = (prompt_profile or "default").strip().lower()
     if name == "planet_taste":
         return False
-    if name in HARNESS_PROFILES:
-        return True
-    domains = classify_domains(question)
-    return any(d in HARNESS_DOMAINS for d in domains)
+    return True
 
 
 def _condense_payload(structured: dict[str, Any], keys: list[str]) -> dict[str, Any]:

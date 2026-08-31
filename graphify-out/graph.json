@@ -96,6 +96,12 @@
       "source_file": "shared/harness_pipeline.py"
     },
     {
+      "id": "mod_shared_life_aspects",
+      "label": "shared/life_aspects.py",
+      "file_type": "code",
+      "source_file": "shared/life_aspects.py"
+    },
+    {
       "id": "mod_shared_llm_nvidia",
       "label": "shared/llm_nvidia.py",
       "file_type": "code",
@@ -184,6 +190,12 @@
       "label": "tests/fixtures_packet.py",
       "file_type": "code",
       "source_file": "tests/fixtures_packet.py"
+    },
+    {
+      "id": "mod_tests_test_api_http",
+      "label": "tests/test_api_http.py",
+      "file_type": "code",
+      "source_file": "tests/test_api_http.py"
     },
     {
       "id": "mod_tests_test_chart_service",
@@ -298,6 +310,12 @@
     {
       "source": "mod_api_app",
       "target": "mod_shared_harness_pipeline",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_api_app",
+      "target": "mod_shared_life_aspects",
       "relation": "imports",
       "confidence": "EXTRACTED"
     },
@@ -603,6 +621,18 @@
     },
     {
       "source": "mod_shared_domain_harness",
+      "target": "mod_shared_life_aspects",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_domain_harness",
+      "target": "mod_shared___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_shared_domain_harness",
       "target": "mod_tests___init__",
       "relation": "imports",
       "confidence": "EXTRACTED"
@@ -836,6 +866,24 @@
       "confidence": "EXTRACTED"
     },
     {
+      "source": "mod_tests_test_api_http",
+      "target": "mod_api_app",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_api_http",
+      "target": "mod_api___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_api_http",
+      "target": "mod_tests___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
       "source": "mod_tests_test_chart_service",
       "target": "mod_shared_chart_key",
       "relation": "imports",
@@ -988,6 +1036,24 @@
     {
       "source": "mod_tests_test_harness_pipeline",
       "target": "mod_tests___init__",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_models_prompts",
+      "target": "mod_api_app",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_models_prompts",
+      "target": "mod_api_schemas",
+      "relation": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "source": "mod_tests_test_models_prompts",
+      "target": "mod_api___init__",
       "relation": "imports",
       "confidence": "EXTRACTED"
     },
